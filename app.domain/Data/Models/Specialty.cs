@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using app.domain.Data.Utils;
 using app.domain.Data.Utils.Enums;
 
@@ -9,6 +5,7 @@ namespace app.domain.Data.Models
 {
     public class Specialty : ABaseModel
     {
+#pragma warning disable CS8618
         public string Name { get; set; }
         public int GeneralCompetition { get; set; }
         public int QuotaLOP { get; set; }

@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace app.domain.Data.Utils
 {
     public class ABaseModel
@@ -11,7 +6,7 @@ namespace app.domain.Data.Utils
 
         public DateTime CreateAt { get; set; }
 
-        public DateTime ChangeAt { get; set; }
+        public DateTime? ChangeAt { get; set; }
 
         public bool IsDeleted { get; set; }
     }

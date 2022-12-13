@@ -52,7 +52,7 @@ namespace WebParse.Services
                         }
                         else if (block.Contains("icolor"))
                         {
-                            string[] spliting = block.Split(new string[] { "<b>", "</b>" }, StringSplitOptions.TrimEntries);
+                            string[] spliting = block.Split(new string[] { "<strong>", "</strong>" }, StringSplitOptions.TrimEntries);
                             if (spliting.Count() != 3)
                             {
                                 //TODO not fount name facultet
