@@ -1,6 +1,6 @@
+using app.common.Utils.Enums;
 using app.domain.Data.Configuration;
 using app.domain.Data.Models;
-using app.domain.Data.Utils.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -57,4 +57,6 @@ public class UnitTest1
         dbContext.Faculties.AddRange(faculties);
         //dbContext.SaveChanges();
     }
+
+
 }

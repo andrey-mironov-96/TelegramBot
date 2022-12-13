@@ -1,11 +1,11 @@
+using app.common.Utils;
 using app.common.Utils.Enums;
-using app.domain.Data.Utils;
 
-namespace app.domain.Data.Models
+namespace app.common.DTO
 {
-    public class Specialty : ABaseModel
+    public class SpecialtyDTO : ABaseDTOEntity
     {
-#pragma warning disable CS8618
+        #pragma warning disable CS8618
         public string Name { get; set; }
         public int GeneralCompetition { get; set; }
         public int QuotaLOP { get; set; }
@@ -14,7 +14,6 @@ namespace app.domain.Data.Models
         public int ExtrabudgetaryPlaces { get; set; }
         public EducationType EducationType {get;set;}
         public long FacultyId { get; set; }
-        public virtual Faculty Faculty { get; set; }
-
+        public  FacultyDTO Faculty { get; set; }
     }
 }

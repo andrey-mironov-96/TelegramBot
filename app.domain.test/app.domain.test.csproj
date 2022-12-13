@@ -32,6 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WebParse\WebParse.csproj" />
     <ProjectReference Include="..\app.domain\app.domain.csproj" />
+    <ProjectReference Include="..\app.test.core\app.test.core.csproj" />
   </ItemGroup>
 
 </Project>

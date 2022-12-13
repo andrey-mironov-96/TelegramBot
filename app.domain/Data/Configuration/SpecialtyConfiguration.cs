@@ -1,6 +1,5 @@
-using System.Runtime.CompilerServices;
+using app.common.Utils.Enums;
 using app.domain.Data.Models;
-using app.domain.Data.Utils.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

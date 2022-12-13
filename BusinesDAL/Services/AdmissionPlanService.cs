@@ -7,12 +7,12 @@ namespace BusinesDAL.Services
     public class AdmissionPlanService : IAdmissionPlanService
     {
         private readonly ILogger<AdmissionPlanService> _logger;
-        private readonly Dictionary<string, List<AdmissionPlan>> _admissionPlans;
+       
 
-        public AdmissionPlanService(ILogger<AdmissionPlanService> logger, Dictionary<string, List<AdmissionPlan>> admissionPlans)
+        public AdmissionPlanService(ILogger<AdmissionPlanService> logger, FacultyRepository)
         {
             _logger = logger;
-            _admissionPlans = admissionPlans;
+    
         }
 
         public ReplyKeyboardMarkup DoWork(string userText)

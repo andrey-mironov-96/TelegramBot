@@ -1,4 +1,4 @@
-namespace app.domain.Data.Utils.Enums
+namespace app.common.Utils.Enums
 {
     public enum EducationType
     {
