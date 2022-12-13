@@ -1,4 +1,7 @@
-﻿using AppBot.Services;
+﻿using app.domain.Abstract;
+using app.domain.Data.Utils.Configure;
+using app.domain.Services;
+using AppBot.Services;
 using BusinesDAL.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,8 +27,10 @@ public class Program
                     services.AddScoped<UpdateHandler>();
                     services.AddScoped<ReceiverService>();
                     services.AddHostedService<PollingService>();
-                    services.AddScoped<IAdmissionPlanService>();
+                    services.AddScoped<IAdmissionPlanService, AdmissionPlanService>();
+                    services.AddScoped<IFacultyRepository, FacultyRepository>();
                     WebParse.Configure.WebParseConfigure.Build(services);
+                    DatabaseConfigure.Build(services);
             }).Build();
 
         await host.RunAsync();

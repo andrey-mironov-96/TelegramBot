@@ -125,13 +125,16 @@ namespace AppBot.Services
 
         private async Task<Message> UlguHandler(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
+            if (message.Text is not {} messageText)
+                throw new ArgumentNullException("message text is empty");
+                _logger.LogInformation("----------------" + message.Chat.Id  +"----------------");
+
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: "Выберите факультет",
-                replyMarkup: _admissionPlanService.DoWork(message.Text),
+                replyMarkup: await _admissionPlanService.AdmissionHandlerAsync(messageText, message.Chat.Id),
                 cancellationToken: cancellationToken
                 );
-
         }
 
         private async Task<Message> Usage(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
@@ -142,7 +145,8 @@ namespace AppBot.Services
                                  "/remove      - remove custom keyboard\n" +
                                  "/photo       - send a photo\n" +
                                  "/request     - request location or contact\n" +
-                                 "/inline_mode - send keyboard with Inline Query";
+                                 "/inline_mode - send keyboard with Inline Query\n" +
+                                 "/ulgu        - keyboard with faculties ulgu" ;
 
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
@@ -224,6 +228,7 @@ namespace AppBot.Services
             {
                 ResizeKeyboard = true
             };
+            _logger.LogInformation("----------------" + message.Chat.Id  +"----------------");
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: "Choose",

@@ -11,5 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WebParse\WebParse.csproj" />
+    <ProjectReference Include="..\app.domain\app.domain.csproj" />
+    <ProjectReference Include="..\app.common\app.common.csproj" />
   </ItemGroup>
 </Project>
