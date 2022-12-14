@@ -1,3 +1,4 @@
+using BusinesDAL.Models;
 using BusinesDAL.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -107,19 +108,20 @@ namespace AppBot.Services
             _logger.LogInformation("Receive message type: {MessageType}", message.Type);
             if (message.Text is not { } messageText)
                 return;
-            Task<Message> action = messageText.Split(' ')[0] switch
-            {
-                "/inline_keyboard" => SendInlineKeyboard(_botClient, message, cancellationToken),
-                "/keyboard" => SendReplyKeyboard(_botClient, message, cancellationToken),
-                "/remove" => RemoveKeyboard(_botClient, message, cancellationToken),
-                "/photo" => SendFile(_botClient, message, cancellationToken),
-                "/request" => RequestContactAndLocation(_botClient, message, cancellationToken),
-                "/inline_mode" => StartInlineQuery(_botClient, message, cancellationToken),
-                "/throw" => FailingHandler(_botClient, message, cancellationToken),
-                "/ulgu" => UlguHandler(_botClient, message, cancellationToken),
-                _ => Usage(_botClient, message, cancellationToken)
-            };
-            Message sentMessage = await action;
+            // Task<Message> action = messageText.Split(' ')[0] switch
+            // {
+            //     "/inline_keyboard" => SendInlineKeyboard(_botClient, message, cancellationToken),
+            //     "/keyboard" => SendReplyKeyboard(_botClient, message, cancellationToken),
+            //     "/remove" => RemoveKeyboard(_botClient, message, cancellationToken),
+            //     "/photo" => SendFile(_botClient, message, cancellationToken),
+            //     "/request" => RequestContactAndLocation(_botClient, message, cancellationToken),
+            //     "/inline_mode" => StartInlineQuery(_botClient, message, cancellationToken),
+            //     "/throw" => FailingHandler(_botClient, message, cancellationToken),
+            //     "/ulgu" => UlguHandler(_botClient, message, cancellationToken),
+            //     _ => Usage(_botClient, message, cancellationToken)
+            // };
+            // Message sentMessage = await action;
+            Message sentMessage = await UlguHandler(_botClient, message, cancellationToken);
             _logger.LogInformation("The message was sent with id: {SentMesageId}", sentMessage.MessageId);
         }
 
@@ -128,11 +130,11 @@ namespace AppBot.Services
             if (message.Text is not {} messageText)
                 throw new ArgumentNullException("message text is empty");
                 _logger.LogInformation("----------------" + message.Chat.Id  +"----------------");
-
+            MessageDTO messageDTO = await _admissionPlanService.AdmissionHandlerAsync(messageText, message.Chat.Id);
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
-                text: "Выберите факультет",
-                replyMarkup: await _admissionPlanService.AdmissionHandlerAsync(messageText, message.Chat.Id),
+                text: messageDTO.Message,
+                replyMarkup: messageDTO.KeyboardMarkup,
                 cancellationToken: cancellationToken
                 );
         }

@@ -1,5 +1,6 @@
 using app.common.Configure;
 using app.domain.Data.Configuration;
+using app.domain.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,10 +28,5 @@ namespace app.domain.Data.Utils.Configure
                 options.EnableSensitiveDataLogging();
             });
         }
-    }
-
-    public enum ConnectionStringEnum
-    {
-        Database
     }
 }

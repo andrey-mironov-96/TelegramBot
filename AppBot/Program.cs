@@ -1,10 +1,12 @@
 ﻿using app.domain.Abstract;
+using app.domain.Cache.Configuration;
 using app.domain.Data.Utils.Configure;
 using app.domain.Services;
 using AppBot.Services;
 using BusinesDAL.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
 using Telegram.Bot;
 
 
@@ -31,6 +33,7 @@ public class Program
                     services.AddScoped<IFacultyRepository, FacultyRepository>();
                     WebParse.Configure.WebParseConfigure.Build(services);
                     DatabaseConfigure.Build(services);
+                    CacheConfigure.Build(services);
             }).Build();
 
         await host.RunAsync();

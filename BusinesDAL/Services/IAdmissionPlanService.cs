@@ -1,10 +1,11 @@
+using BusinesDAL.Models;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BusinesDAL.Services
 {
     public interface IAdmissionPlanService
     {
-        Task<ReplyKeyboardMarkup> AdmissionHandlerAsync(string message, long userId);
+        Task<MessageDTO> AdmissionHandlerAsync(string message, long userId);
 
     }
 }
