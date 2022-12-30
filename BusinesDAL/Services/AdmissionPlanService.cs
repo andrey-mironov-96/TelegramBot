@@ -1,7 +1,7 @@
 using app.common.DTO;
 using app.common.Utils.Enums;
 using app.domain.Abstract;
-using app.domain.Services;
+using BusinesDAL.Abstract;
 using BusinesDAL.Models;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -13,25 +13,30 @@ namespace BusinesDAL.Services
         private readonly ILogger<AdmissionPlanService> _logger;
         private readonly IFacultyRepository _facultyRepository;
         private readonly IStateService _stateService;
+        private readonly IFuzzyService _fuzzyService;
 
-        public AdmissionPlanService(ILogger<AdmissionPlanService> logger, IFacultyRepository facultyRepository, IStateService stateService)
+        public AdmissionPlanService(
+            ILogger<AdmissionPlanService> logger,
+            IFacultyRepository facultyRepository,
+            IStateService stateService,
+            IFuzzyService fuzzyService)
         {
             _logger = logger;
             _facultyRepository = facultyRepository;
             _stateService = stateService;
-
+            _fuzzyService = fuzzyService;
         }
 
         public async Task<MessageDTO> AdmissionHandlerAsync(string message, long userId)
         {
             try
             {
-                StateType stateType = await _stateService.GetStateAsync(userId.ToString());
-                Task<MessageDTO> action = stateType switch
+                StateValue statevalue = await _stateService.GetStateAsync(userId.ToString());
+                Task<MessageDTO> action = statevalue.State switch
                 {
-                    StateType.None or
-                    StateType.Faculty => GetFacultiesAsync(userId),
-                    StateType.Speciality => GetSpecialtiesAsync(message, userId),
+                    StateType.None    => GetFacultiesAsync(userId),
+                    StateType.Faculty => GetSpecialtiesAsync(message, userId),
+                    StateType.Speciality => GetInfoAboutSpecialtyAsync(message, userId),
                     StateType.Information => GetInfoAboutSpecialtyAsync(message, userId),
                     _ => GetFacultiesAsync(userId)
                 };
@@ -44,24 +49,63 @@ namespace BusinesDAL.Services
             }
         }
 
+        public async Task<MessageDTO> GetFacultiesAsync(long userId, string additionalMessage = "")
+        {
+            try
+            {
+                ReplyKeyboardMarkup replyKeyboardMarkup = await GetKeyboardFacultiesAsync();
+                await _stateService.ChangeStateAsync(new StateValue() { State = StateType.Faculty, Message = String.Empty }, userId.ToString());
+                return new MessageDTO
+                {
+                    Message = string.IsNullOrEmpty(additionalMessage) || string.IsNullOrWhiteSpace(additionalMessage) ? "Факультеты вуза:" : additionalMessage,
+                    KeyboardMarkup = replyKeyboardMarkup
+                };
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return new MessageDTO
+                {
+                    Message = "Не могу найти выбранный факультет.\n Вот какие факультеты я знаю",
+                    KeyboardMarkup = await GetKeyboardFacultiesAsync()
+                };
+            }
+        }
+
+        public async Task<MessageDTO> GoBackAsync(long userId)
+        {
+            StateValue stateValue = await _stateService.GetStateAsync(userId.ToString());
+            if (stateValue == null)
+            {
+                return await GetFacultiesAsync(userId);
+            }
+            Task<MessageDTO> message = stateValue.State switch
+            {
+                StateType.None or
+                StateType.Faculty => this.GetFacultiesAsync(userId),
+                StateType.Speciality => this.GetFacultiesAsync(userId),
+                StateType.Information => this.GetRelatedSpecialtiesOfFaculty(stateValue.Message, userId),
+                _ => this.GetFacultiesAsync(userId)
+            };
+            return await GetFacultiesAsync(userId);
+        }
+
+
         private async Task<MessageDTO> GetInfoAboutSpecialtyAsync(string message, long userId)
         {
             IEnumerable<FacultyDTO> faculties = await _facultyRepository.GetAsync();
             IEnumerable<SpecialtyDTO> specialities = faculties.SelectMany(fac => fac.Specialities);
-            SpecialtyDTO? speciality = specialities.SingleOrDefault(sp => sp.Name.ToLower() == message.ToLower());
+            SpecialtyDTO? speciality = specialities.FirstOrDefault(sp => sp.Name.ToLower() == message.ToLower());
             if (speciality == null)
             {
-                return new MessageDTO
-                {
-                    Message = "Я не знаю такую специальность. Попробуйте снова",
-                    KeyboardMarkup = await GetKeyboardFacultiesAsync()
-                };
+                return await GetFacultiesAsync(userId, "Я не знаю такую специальность. Давайте попробуем снова");
             }
+            await _stateService.ChangeStateAsync(new StateValue() { Message = message, State = StateType.Information }, userId.ToString());
             return new MessageDTO
             {
-                Message = speciality.ToString()
+                Message = speciality.ToString(),
+                KeyboardMarkup = new ReplyKeyboardMarkup(new List<KeyboardButton[]>{new KeyboardButton[] { "Назад" }})
             };
-
         }
 
         private async Task<MessageDTO> GetSpecialtiesAsync(string message, long userId)
@@ -69,7 +113,7 @@ namespace BusinesDAL.Services
             try
             {
                 ReplyKeyboardMarkup replyKeyboardMarkup = await GetKeyboardSpecialtiesAsync(message);
-                await _stateService.ChangeStateAsync(StateType.Information, userId.ToString());
+                await _stateService.ChangeStateAsync(new StateValue() { State = StateType.Speciality, Message = message }, userId.ToString());
                 return new MessageDTO
                 {
                     Message = "Специальности (направления) по выбранному факультету:",
@@ -89,31 +133,6 @@ namespace BusinesDAL.Services
             {
                 _logger.LogError(ex, ex.Message);
                 throw ex;
-            }
-
-
-        }
-
-        private async Task<MessageDTO> GetFacultiesAsync(long userId)
-        {
-            try
-            {
-                ReplyKeyboardMarkup replyKeyboardMarkup = await GetKeyboardFacultiesAsync();
-                await _stateService.ChangeStateAsync(StateType.Speciality, userId.ToString());
-                return new MessageDTO
-                {
-                    Message = "Факультеты вуза:",
-                    KeyboardMarkup = replyKeyboardMarkup
-                };
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return new MessageDTO
-                {
-                    Message = "Не могу найти выбранный факультет.\n Вот какие факультеты я знаю",
-                    KeyboardMarkup = await GetKeyboardFacultiesAsync()
-                };
             }
         }
 
@@ -136,11 +155,13 @@ namespace BusinesDAL.Services
             List<KeyboardButton[]> specialitiesButtons = new List<KeyboardButton[]>();
             ReplyKeyboardMarkup replyKeyboardMarkup = null;
             var faculties = await _facultyRepository.GetAsync();
-            var faculty = faculties.SingleOrDefault(fac => fac.Name.ToLower() == message.ToLower());
+            string facultyName = _fuzzyService.Run(message, faculties.Select(s => s.Name), true);
+            var faculty = faculties.SingleOrDefault(faculty => faculty.Name.ToLower() == facultyName.ToLower());
             if (faculty == null)
             {
                 throw new ArgumentException($"Not found faculty with name: {message}");
             }
+            specialitiesButtons.Add(new KeyboardButton[] { "Назад" });
             foreach (var speciality in faculty.Specialities)
             {
                 specialitiesButtons.Add(new KeyboardButton[] { speciality.Name });
@@ -150,6 +171,50 @@ namespace BusinesDAL.Services
                 ResizeKeyboard = true
             };
             return replyKeyboardMarkup;
+        }
+
+        private async Task<MessageDTO> GetSpecilitiesByFacultyName(long userId, string facultyName)
+        {
+            try
+            {
+                ReplyKeyboardMarkup replyKeyboardMarkup = await GetKeyboardSpecialtiesAsync(facultyName);
+                await _stateService.ChangeStateAsync(new StateValue() { State = StateType.Information, Message = facultyName }, userId.ToString());
+                return new MessageDTO
+                {
+                    Message = "Специальности (направления) по факультету " + facultyName,
+                    KeyboardMarkup = replyKeyboardMarkup
+                };
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return new MessageDTO
+                {
+                    Message = "Не могу найти специальности по выбранному факультету.\n Вот какие факультеты я знаю",
+                    KeyboardMarkup = await GetKeyboardFacultiesAsync()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw ex;
+            }
+        }
+
+        private async Task<MessageDTO> GetRelatedSpecialtiesOfFaculty(string specialityName, long userId)
+        {
+            IEnumerable<FacultyDTO> faculties = await _facultyRepository.GetAsync();
+            long facultyId = faculties
+                                    .SelectMany(faculty => faculty.Specialities)
+                                    .Single(speciality => speciality.Name == specialityName).FacultyId;
+            string facultyName = faculties.Single(faculty => faculty.Id == facultyId).Name;
+            MessageDTO message = new MessageDTO()
+            {
+                KeyboardMarkup = await GetKeyboardSpecialtiesAsync(facultyName),
+                Message = $"Специальности факультета: {facultyName}"
+            };
+            await _stateService.ChangeStateAsync(new StateValue{Message = facultyName, State = StateType.Faculty}, userId.ToString());
+            return message;
         }
     }
 }

@@ -64,17 +64,19 @@ namespace WebParse.Services
                             if (block.Contains("<td>"))
                             {
                                 string[] spliting = block.Split(new string[] { "<td>", "</td>" }, StringSplitOptions.None);
-                                admissionPlans.Add(new AdmissionPlan
-                                {
-                                    SpecialtyName = RemoveDirtInString(spliting[1]),
-                                    GeneralCompetition = ParseAdmision(spliting[3]),
-                                    QuotaLOP = ParseAdmision(spliting[5]),
-                                    TargetAdmissionQuota = ParseAdmision(spliting[7]),
-                                    SpecialQuota = ParseAdmision(spliting[9]),
-                                    ExtrabudgetaryPlaces = ParseAdmision(spliting[11]),
-                                    TypeEducation = type,
-                                    FacultetName = RemoveDirtInString(facultetName)
-                                });
+                                    admissionPlans.Add(new AdmissionPlan
+                                    {
+                                        SpecialtyName = RemoveDirtInString(spliting[1]),
+                                        GeneralCompetition = ParseAdmision(spliting[3]),
+                                        QuotaLOP = ParseAdmision(spliting[5]),
+                                        TargetAdmissionQuota = ParseAdmision(spliting[7]),
+                                        SpecialQuota = ParseAdmision(spliting[9]),
+                                        ExtrabudgetaryPlaces = ParseAdmision(spliting[11]),
+                                        TypeEducation = type,
+                                        FacultetName = RemoveDirtInString(facultetName)
+                                    });
+                                
+
                             }
                         }
                     }
@@ -83,7 +85,7 @@ namespace WebParse.Services
                         return admissionPlans.GroupBy(o => o.FacultetName)
                             .ToDictionary(g => g.Key, g => g.ToList());
                     }
-                }   
+                }
             }
             return null;
         }
@@ -116,7 +118,7 @@ namespace WebParse.Services
             List<string> pureElements = new List<string>();
             for (int i = 0; i < values.Count(); i++)
             {
-                if (!String.IsNullOrWhiteSpace(values[i]) && !String.IsNullOrEmpty(values[i]) )
+                if (!String.IsNullOrWhiteSpace(values[i]) && !String.IsNullOrEmpty(values[i]))
                 {
                     pureElements.Add(values[i]);
                 }

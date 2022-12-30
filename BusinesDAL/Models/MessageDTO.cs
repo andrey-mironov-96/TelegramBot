@@ -7,6 +7,6 @@ namespace BusinesDAL.Models
         #pragma warning disable CS8618
         public string Message { get; set; }
 
-        public ReplyKeyboardMarkup? KeyboardMarkup { get; set; }
+        public IReplyMarkup? KeyboardMarkup { get; set; }
     }
 }

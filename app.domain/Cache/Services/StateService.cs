@@ -1,6 +1,8 @@
+using app.common.DTO;
 using app.common.Utils.Enums;
 using app.domain.Abstract;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace app.domain.Cache.Services
@@ -15,21 +17,24 @@ namespace app.domain.Cache.Services
             _logger = logger;
             _cache = conMultiplexer.GetDatabase();
         }
-        public async Task ChangeStateAsync(StateType type, string id)
+        public async Task ChangeStateAsync(StateValue cacheValue, string id)
         {
-            await _cache.StringSetAsync(id.ToString(), type.ToString(), TimeSpan.FromMinutes(expiry));
+             string value = JsonConvert.SerializeObject(cacheValue);
+             await _cache.StringSetAsync(id.ToString(), value, TimeSpan.FromMinutes(expiry));
         }
 
-        public async Task<StateType> GetStateAsync(string id)
+        public async Task<StateValue> GetStateAsync(string id)
         {
             var valueFromCache = await _cache.StringGetAsync(id.ToString(), CommandFlags.None);
             if (!valueFromCache.HasValue)
             {
-                await this.ChangeStateAsync(StateType.None, id);
-                return StateType.None;
+                StateValue defaultCacheValue = new StateValue(){State = StateType.None, Message = string.Empty};
+                await this.ChangeStateAsync(defaultCacheValue, id);
+                return defaultCacheValue;
             }
-            StateType type = (StateType)Enum.Parse(typeof(StateType), valueFromCache.ToString());
-            return type;
+            StateValue cacheValue = JsonConvert.DeserializeObject<StateValue>(valueFromCache);
+            return cacheValue;
         }
+
     }
 }

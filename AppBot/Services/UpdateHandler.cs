@@ -108,8 +108,16 @@ namespace AppBot.Services
             _logger.LogInformation("Receive message type: {MessageType}", message.Type);
             if (message.Text is not { } messageText)
                 return;
-            // Task<Message> action = messageText.Split(' ')[0] switch
-            // {
+            Task<Message> action = messageText.Split(' ')[0].ToLower() switch
+            {
+                "начать" or
+                "/start" => WelcomeHandler(_botClient, message, cancellationToken),
+                "факультеты" => UlguFacultetiesHandler(_botClient, message, cancellationToken),
+                "/clear" or
+                "сброс" => ClearHandler(_botClient, message, cancellationToken),
+                "назад" => BackHandler(_botClient, message, cancellationToken),
+                _ => UlguHandler(_botClient, message, cancellationToken)
+            };
             //     "/inline_keyboard" => SendInlineKeyboard(_botClient, message, cancellationToken),
             //     "/keyboard" => SendReplyKeyboard(_botClient, message, cancellationToken),
             //     "/remove" => RemoveKeyboard(_botClient, message, cancellationToken),
@@ -120,16 +128,67 @@ namespace AppBot.Services
             //     "/ulgu" => UlguHandler(_botClient, message, cancellationToken),
             //     _ => Usage(_botClient, message, cancellationToken)
             // };
-            // Message sentMessage = await action;
-            Message sentMessage = await UlguHandler(_botClient, message, cancellationToken);
+            Message sentMessage = await action;
+
             _logger.LogInformation("The message was sent with id: {SentMesageId}", sentMessage.MessageId);
+        }
+
+        private async Task<Message> BackHandler(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
+        {
+            if (message.Text is not { } messageText)
+                throw new ArgumentNullException("message text is empty");
+            MessageDTO messageDTO = await _admissionPlanService.GoBackAsync(message.Chat.Id);
+            return await botClient.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: messageDTO.Message,
+                replyMarkup: messageDTO.KeyboardMarkup,
+                cancellationToken: cancellationToken
+                );
+        }
+
+        private async Task<Message> WelcomeHandler(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
+        {
+            var result = await _admissionPlanService.GetFacultiesAsync(message.Chat.Id,
+            "Привет! Я чат-бот УлГубот.\n" +
+            "Я помогаю аббитуриентам найти информацию о специальностях в вузе\n" +
+            "Для начала давай выберем интересующий тебя факультет:");
+            return await botClient.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: result.Message,
+                replyMarkup: result.KeyboardMarkup,
+                cancellationToken: cancellationToken);
+        }
+
+        private async Task<Message> UlguFacultetiesHandler(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
+        {
+            if (message.Text is not { } messageText)
+                throw new ArgumentNullException("message text is empty");
+            MessageDTO messageDTO = await _admissionPlanService.GoBackAsync(message.Chat.Id);
+            return await botClient.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: messageDTO.Message,
+                replyMarkup: messageDTO.KeyboardMarkup,
+                cancellationToken: cancellationToken
+                );
+        }
+
+        private async Task<Message> ClearHandler(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
+        {
+            if (message.Text is not { } messageText)
+                throw new ArgumentNullException("message text is empty");
+            MessageDTO messageDTO = await _admissionPlanService.GetFacultiesAsync(message.Chat.Id);
+            return await botClient.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: messageDTO.Message,
+                replyMarkup: messageDTO.KeyboardMarkup,
+                cancellationToken: cancellationToken
+                );
         }
 
         private async Task<Message> UlguHandler(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
-            if (message.Text is not {} messageText)
+            if (message.Text is not { } messageText)
                 throw new ArgumentNullException("message text is empty");
-                _logger.LogInformation("----------------" + message.Chat.Id  +"----------------");
             MessageDTO messageDTO = await _admissionPlanService.AdmissionHandlerAsync(messageText, message.Chat.Id);
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
@@ -148,7 +207,7 @@ namespace AppBot.Services
                                  "/photo       - send a photo\n" +
                                  "/request     - request location or contact\n" +
                                  "/inline_mode - send keyboard with Inline Query\n" +
-                                 "/ulgu        - keyboard with faculties ulgu" ;
+                                 "/ulgu        - keyboard with faculties ulgu";
 
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
@@ -230,7 +289,7 @@ namespace AppBot.Services
             {
                 ResizeKeyboard = true
             };
-            _logger.LogInformation("----------------" + message.Chat.Id  +"----------------");
+            _logger.LogInformation("----------------" + message.Chat.Id + "----------------");
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: "Choose",
@@ -276,4 +335,6 @@ namespace AppBot.Services
             );
         }
     }
+
+
 }

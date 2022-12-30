@@ -3,6 +3,7 @@ using app.domain.Cache.Configuration;
 using app.domain.Data.Utils.Configure;
 using app.domain.Services;
 using AppBot.Services;
+using BusinesDAL.Abstract;
 using BusinesDAL.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,6 +31,7 @@ public class Program
                     services.AddScoped<ReceiverService>();
                     services.AddHostedService<PollingService>();
                     services.AddScoped<IAdmissionPlanService, AdmissionPlanService>();
+                    services.AddScoped<IFuzzyService, FuzzyService>();
                     services.AddScoped<IFacultyRepository, FacultyRepository>();
                     WebParse.Configure.WebParseConfigure.Build(services);
                     DatabaseConfigure.Build(services);

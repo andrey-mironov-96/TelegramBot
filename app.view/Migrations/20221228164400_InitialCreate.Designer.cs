@@ -12,7 +12,7 @@ using app.domain.Data.Configuration;
 namespace app.view.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221213102056_InitialCreate")]
+    [Migration("20221228164400_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
