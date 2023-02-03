@@ -95,7 +95,7 @@ namespace BusinesDAL.Services
         {
             IEnumerable<FacultyDTO> faculties = await _facultyRepository.GetAsync();
             IEnumerable<SpecialtyDTO> specialities = faculties.SelectMany(fac => fac.Specialities);
-            SpecialtyDTO? speciality = specialities.FirstOrDefault(sp => sp.Name.ToLower() == message.ToLower());
+            SpecialtyDTO speciality = specialities.FirstOrDefault(sp => sp.Name.ToLower() == message.ToLower());
             if (speciality == null)
             {
                 return await GetFacultiesAsync(userId, "Я не знаю такую специальность. Давайте попробуем снова");
