@@ -102,6 +102,7 @@ namespace app.domain.Services
             faculty.Specialities = null;
             if (value.Id > 0)
             {
+                faculty.ChangeAt = DateTime.Now;
                 _dbContext.Entry<Faculty>(faculty).State = EntityState.Modified;
                 if (faculty.Specialities != null && faculty.Specialities.Count > 0)
                 {
@@ -113,6 +114,7 @@ namespace app.domain.Services
             }
             else
             {
+                faculty.CreateAt = DateTime.Now;
                 _dbContext.Faculties.Add(faculty);
             }
             await _dbContext.SaveChangesAsync();
@@ -121,14 +123,15 @@ namespace app.domain.Services
 
         public async Task<bool> DeleteAsync(long id)
         {
-            Faculty value = await _dbContext.Faculties
-                .Include(faculty => faculty.Specialities)
-                .FirstOrDefaultAsync(faculty => faculty.Id == id);
-            if (value != null)
-            {
-                _dbContext.Remove(value);
-                await _dbContext.SaveChangesAsync();
-            }
+            await _dbContext.Faculties.Where(faculty => faculty.Id == id)
+                .ExecuteUpdateAsync(_ => _
+                    .SetProperty(prop => prop.IsDeleted, true));
+
+            await _dbContext.Specialies.Where(speciality => speciality.FacultyId == id)
+                .ExecuteUpdateAsync(_ => _
+                    .SetProperty(prop => prop.IsDeleted, true));
+
+
             return true;
         }
 
@@ -137,11 +140,14 @@ namespace app.domain.Services
             int offset = (data.Page - 1) * data.PageSize;
             List<Faculty> result = await _dbContext.Faculties
                 .Include(faculty => faculty.Specialities)
+                .Where(faculty => !faculty.IsDeleted)
                 .Skip(offset)
                 .Take(data.PageSize)
                 .ToListAsync();
             data.Total = await _dbContext.Faculties
-                .Include(faculty => faculty.Specialities).CountAsync();
+                .Include(faculty => faculty.Specialities)
+                .Where(faculty => !faculty.IsDeleted)
+                .CountAsync();
             data.Data = ToDTO(result);
             return data;
         }

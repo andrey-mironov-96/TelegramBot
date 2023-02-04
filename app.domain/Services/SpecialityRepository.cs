@@ -23,7 +23,8 @@ namespace app.domain.Services
         public async Task<bool> DeleteAsync(long id)
         {
             await database.Specialies.Where(spec => spec.Id == id)
-                .ExecuteDeleteAsync();
+                .ExecuteUpdateAsync(_ => _
+                    .SetProperty(prop => prop.IsDeleted, true));
             return true;
         }
 
@@ -42,10 +43,12 @@ namespace app.domain.Services
             Specialty specialty = ToDomain(value);
             if (value.Id == 0)
             {
+                value.CreateAt = DateTime.Now;
                 this.database.Specialies.Add(specialty);
             }
             else
             {
+                value.ChangeAt = DateTime.Now;
                 this.database.Entry(specialty).State = EntityState.Modified;
             }
             await this.database.SaveChangesAsync();
@@ -56,10 +59,13 @@ namespace app.domain.Services
         {
             int offset = (data.Page - 1) * data.PageSize;
             List<Specialty> result = await database.Specialies
+                .Where(speciality => !speciality.IsDeleted)
                 .Skip(offset)
                 .Take(data.PageSize)
                 .ToListAsync();
-            data.Total = await database.Specialies.CountAsync();
+            data.Total = await database.Specialies
+            .Where(speciality => !speciality.IsDeleted)
+            .CountAsync();
             data.Data = ToDTO(result);
             return data;
         }
@@ -68,7 +74,7 @@ namespace app.domain.Services
         {
             int offset = (data.Page - 1) * data.PageSize;
             List<Specialty> result = await database.Specialies.AsNoTracking()
-                .Where(spec => spec.FacultyId == facultyId)
+                .Where(spec => spec.FacultyId == facultyId && !spec.IsDeleted)
                 .Skip(offset)
                 .Take(data.PageSize)
                 .ToListAsync();
