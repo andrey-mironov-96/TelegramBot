@@ -6,22 +6,24 @@ using Microsoft.Extensions.Logging;
 
 namespace BusinesDAL.Services
 {
-    public class FacultyBusinessService : IFacultyBusinessService
+    public class SpecialityBusinessService : ISpecialityBusinessService
     {
-        private readonly ILogger<FacultyBusinessService> logger;
-        private readonly IFacultyRepository fRepository;
+        private readonly ILogger<SpecialityBusinessService> logger;
+        private readonly ISpecialityRepository repository;
 
-        public FacultyBusinessService(ILogger<FacultyBusinessService> logger, IFacultyRepository fRepository)
+        public SpecialityBusinessService(
+            ILogger<SpecialityBusinessService> logger,
+            ISpecialityRepository repository
+            )
         {
             this.logger = logger;
-            this.fRepository = fRepository;
+            this.repository = repository;
         }
-
         public Task<bool> DeleteAsync(long id)
         {
             try
             {
-                return this.fRepository.DeleteAsync(id);
+                return this.repository.DeleteAsync(id);
             }
             catch (Exception ex)
             {
@@ -30,11 +32,11 @@ namespace BusinesDAL.Services
             }
         }
 
-        public Task<FacultyDTO> GetByIdAsync(long id)
+        public Task<SpecialtyDTO> GetByIdAsync(long id)
         {
             try
             {
-                return this.fRepository.GetAsync(id);
+                return this.repository.GetAsync(id);
             }
             catch (Exception ex)
             {
@@ -43,11 +45,11 @@ namespace BusinesDAL.Services
             }
         }
 
-        public Task<IEnumerable<FacultyDTO>> GetFacultiesAsync()
+        public Task<PageableData<SpecialtyDTO>> GetPage(PageableData<SpecialtyDTO> data)
         {
             try
             {
-                return fRepository.GetAsync();
+                return this.repository.GetPage(data);
             }
             catch (Exception ex)
             {
@@ -56,36 +58,30 @@ namespace BusinesDAL.Services
             }
         }
 
-        public Task<FacultyDTO> GetFacultyAsync(long id)
-        {
-            return this.GetByIdAsync(id);
-        }
-
-        public Task<PageableData<FacultyDTO>> GetPage(PageableData<FacultyDTO> data)
+        public Task<PageableData<SpecialtyDTO>> GetPageSpecialityOfFacultyAsync(PageableData<SpecialtyDTO> data, long facultyId)
         {
             try
             {
-                return fRepository.GetPage(data);
+                return this.repository.GetPageSpecialityOfFacultyAsync(data, facultyId);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.logger.LogError(ex, ex.Message);
                 throw ex;
             }
         }
 
-        public Task<FacultyDTO> SaveAsync(FacultyDTO item)
+        public Task<SpecialtyDTO> SaveAsync(SpecialtyDTO item)
         {
             try
             {
-                return this.fRepository.SaveAsync(item);
+                return this.repository.SaveAsync(item);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.logger.LogError(ex, ex.Message);
                 throw ex;
             }
         }
-
     }
 }

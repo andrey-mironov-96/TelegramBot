@@ -7,6 +7,8 @@ namespace app.domain.Abstract
         public Task<DTOEntity> GetAsync(long id);
 
         public Task<DTOEntity> SaveAsync(DTOEntity value);
+
+        public Task<bool> DeleteAsync(long id);
         
     }
 }

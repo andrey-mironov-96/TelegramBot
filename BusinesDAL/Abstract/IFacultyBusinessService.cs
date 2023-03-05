@@ -1,8 +1,10 @@
 using app.common.DTO;
+using app.common.Utils.Abstract;
+using app.common.DTO;
 
 namespace BusinesDAL.Abstract
 {
-    public interface IFacultyBusinessService
+    public interface IFacultyBusinessService : IBaseBusinessService<FacultyDTO>
     {
         Task<IEnumerable<FacultyDTO>> GetFacultiesAsync();
 

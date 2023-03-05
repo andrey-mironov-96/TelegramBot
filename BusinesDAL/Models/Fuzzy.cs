@@ -11,6 +11,6 @@ namespace BusinesDAL.Models
 
         public FuzzyType Type { get; set; }
 
-        public AdmissionPlan? AddmissionPlan { get; set; }
+        public AdmissionPlan AddmissionPlan { get; set; }
     }
 }

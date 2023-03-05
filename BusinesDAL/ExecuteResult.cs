@@ -6,6 +6,6 @@ namespace BusinesDAL
     {
         public string Message { get; set; }
 
-        public IReplyMarkup? replyMarkup { get; set; }
+        public IReplyMarkup replyMarkup { get; set; }
     }
 }
