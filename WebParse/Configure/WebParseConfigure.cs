@@ -10,11 +10,11 @@ namespace WebParse.Configure
     {
         public static void Build(IServiceCollection services)
         {
-            ILogger<WebParseConfigure> logger = LoggerFactory.Create(_ => _.AddConsole()).CreateLogger<WebParseConfigure>();
-            IWebParseService webParse = new  WebParseService();
+            // ILogger<WebParseConfigure> logger = LoggerFactory.Create(_ => _.AddConsole()).CreateLogger<WebParseConfigure>();
+            // IWebParseService webParse = new  WebParseService();
             // const string linkForParse = "https://abiturient.ulsu.ru/tiles/documents/86";
             // logger.LogInformation($"Starting parse data from {linkForParse}");
-            // Dictionary<string, List<AdmissionPlan>> admissionPlans = webParse.GetAsync(linkForParse, WebParse.Utils.Enums.HttpType.Get).Result;
+            // Dictionary<string, List<AdmissionPlan>> admissionPlans = webParse.GetFacultiesAndSpecialitiesAsync().Result;
             // logger.LogInformation($"Finished parse data");
             // services.AddSingleton<Dictionary<string, List<AdmissionPlan>>>(admissionPlans);
         }

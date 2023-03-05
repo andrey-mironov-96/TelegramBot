@@ -1,19 +1,28 @@
+using app.common.DTO;
 using app.common.Utils.Enums;
 using app.domain.Data.Configuration;
 using app.domain.Data.Models;
+using app.test.core.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using WebParse.Business;
 
 namespace app.domain.test;
 
-public class UnitTest1
+public class WebParseServiceTest : ABaseTest<IWebParseService>
 {
-    [Fact]
-    public void Test1()
+
+    public override IWebParseService GetCurrentService()
     {
-        WebParseService webParse = new WebParseService();
+        return this.GetWebParseService();
+    }
+    [Fact]
+    public void GetFacultiesAndSpecialities()
+    {
+        IWebParseService webParse = this.GetCurrentService();
         const string linkForParse = "https://abiturient.ulsu.ru/tiles/documents/86";
-        Dictionary<string, List<AdmissionPlan>> admissionPlans = webParse.GetAsync(linkForParse, WebParse.Utils.Enums.HttpType.Get).Result;
+        Dictionary<string, List<AdmissionPlan>> admissionPlans = webParse.GetFacultiesAndSpecialitiesAsync().Result;
         var options = new DbContextOptionsBuilder<AppDbContext>()
          .UseNpgsql("Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = telegram_bot")
          .LogTo(Console.WriteLine, LogLevel.Information);
@@ -32,7 +41,7 @@ public class UnitTest1
                 Name = item.Key,
             };
             List<Specialty> specialties = new List<Specialty>();
-            foreach(var s in item.Value)
+            foreach (var s in item.Value)
             {
                 Specialty specialty = new Specialty()
                 {
@@ -47,7 +56,7 @@ public class UnitTest1
                     QuotaLOP = s.QuotaLOP,
                     SpecialQuota = s.SpecialQuota,
                     TargetAdmissionQuota = s.TargetAdmissionQuota,
-                    EducationType = (EducationType)Enum.Parse(typeof(EducationType),s.TypeEducation.ToString())
+                    EducationType = (EducationType)Enum.Parse(typeof(EducationType), s.TypeEducation.ToString())
                 };
                 specialties.Add(specialty);
             }
@@ -55,7 +64,27 @@ public class UnitTest1
             faculties.Add(faculty);
         }
         dbContext.Faculties.AddRange(faculties);
-        //dbContext.SaveChanges();
+        dbContext.SaveChanges();
+    }
+
+
+    [Fact]
+    public async Task GetDataFromULGUSiteTest()
+    {
+        IWebParseService webParseService = GetCurrentService();
+        try
+        {
+           ParsingResult<Dictionary<string, List<AdmissionPlan>>> result = await webParseService.GetDataFromULGUSite();
+        }
+        catch (Exception e)
+        {
+            
+        }
+
+
+
+
+
     }
 
 

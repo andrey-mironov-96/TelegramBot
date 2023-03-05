@@ -56,6 +56,11 @@ namespace BusinesDAL.Services
             }
         }
 
+        public Task<FacultyDTO> GetFacultyAsync(long id)
+        {
+            return this.GetByIdAsync(id);
+        }
+
         public Task<PageableData<FacultyDTO>> GetPage(PageableData<FacultyDTO> data)
         {
             try

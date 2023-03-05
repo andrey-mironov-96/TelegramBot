@@ -20,6 +20,7 @@ namespace app.domain.Cache.Configuration
             }
             services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(connectionString));
             services.AddScoped<IStateService, StateService>();
+            services.AddScoped<IStackTraceService, StackTraceService>();
         }
     }
 

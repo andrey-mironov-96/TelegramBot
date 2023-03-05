@@ -1,5 +1,3 @@
-using app.common.DTO;
-using app.common.Utils.Enums;
 using app.domain.Abstract;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -17,24 +15,27 @@ namespace app.domain.Cache.Services
             _logger = logger;
             _cache = conMultiplexer.GetDatabase();
         }
-        public async Task ChangeStateAsync(StateValue cacheValue, string id)
+       
+        public async Task<bool> SetKeyAsync<T>(T value, string key)
         {
-             string value = JsonConvert.SerializeObject(cacheValue);
-             await _cache.StringSetAsync(id.ToString(), value, TimeSpan.FromMinutes(expiry));
+            string strData = JsonConvert.SerializeObject(value);
+            await _cache.StringSetAsync(key, strData);
+            await _cache.KeyExpireAsync(key, TimeSpan.FromHours(expiry));
+            return true;
         }
 
-        public async Task<StateValue> GetStateAsync(string id)
+        public async Task<T> GetKeyAsync<T>(string key)
         {
-            var valueFromCache = await _cache.StringGetAsync(id.ToString(), CommandFlags.None);
-            if (!valueFromCache.HasValue)
-            {
-                StateValue defaultCacheValue = new StateValue(){State = StateType.None, Message = string.Empty};
-                await this.ChangeStateAsync(defaultCacheValue, id);
-                return defaultCacheValue;
+            RedisValue redisValue = await _cache.StringGetAsync(key);
+            if (redisValue.HasValue)
+            {   string strData = redisValue.ToString();
+                T data = JsonConvert.DeserializeObject<T>(strData);
+                await _cache.KeyExpireAsync(key, TimeSpan.FromHours(expiry));
+                return data;
             }
-            StateValue cacheValue = JsonConvert.DeserializeObject<StateValue>(valueFromCache);
-            return cacheValue;
-        }
+            return default;
 
+
+        }
     }
 }

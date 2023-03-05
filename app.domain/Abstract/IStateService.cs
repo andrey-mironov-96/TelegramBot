@@ -5,7 +5,7 @@ namespace app.domain.Abstract
 {
     public interface IStateService
     {
-        public Task ChangeStateAsync(StateValue value, string id);
-        public Task<StateValue> GetStateAsync(string id);
+        Task<bool> SetKeyAsync<T>(T value, string key);
+        Task<T> GetKeyAsync<T>(string key);
     }
 }

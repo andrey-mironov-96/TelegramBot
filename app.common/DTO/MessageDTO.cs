@@ -1,6 +1,6 @@
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace BusinesDAL.Models
+namespace app.common.DTO
 {
     public class MessageDTO
     {
