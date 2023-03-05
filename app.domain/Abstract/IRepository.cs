@@ -5,6 +5,8 @@ namespace app.domain.Abstract
         public Task<IEnumerable<DTOEntity>> GetAsync();
 
         public Task<DTOEntity> GetAsync(long id);
+
+        public Task<DTOEntity> SaveAsync(DTOEntity value);
         
     }
 }

@@ -9,4 +9,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\app.domain\app.domain.csproj" />
+    <ProjectReference Include="..\app.common\app.common.csproj" />
+  </ItemGroup>
 </Project>

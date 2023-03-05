@@ -1,10 +1,13 @@
+using app.common.DTO;
 using WebParse.Models;
-using WebParse.Utils.Enums;
 
 namespace WebParse.Business
 {
     public interface IWebParseService
     {
-        public Task<Dictionary<string, List<AdmissionPlan>>> GetAsync(string http, HttpType httpType);
+        public Task<Dictionary<string, List<AdmissionPlan>>> GetFacultiesAndSpecialitiesAsync();
+        public Task<ParsingResult<Dictionary<string, List<AdmissionPlan>>>> GetPriceForSpecialities(Dictionary<string, List<AdmissionPlan>> faculties);
+
+        public Task<ParsingResult<Dictionary<string, List<AdmissionPlan>>>> GetDataFromULGUSite();
     }
 }

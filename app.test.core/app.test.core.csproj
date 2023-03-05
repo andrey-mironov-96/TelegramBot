@@ -3,6 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\app.common\app.common.csproj" />
     <ProjectReference Include="..\app.domain\app.domain.csproj" />
+    <ProjectReference Include="..\WebParse\WebParse.csproj" />
+    <ProjectReference Include="..\BusinesDAL\BusinesDAL.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

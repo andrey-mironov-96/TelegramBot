@@ -62,6 +62,51 @@ namespace app.domain.Services
                     }).ToList()
                 });
 
+        public static Faculty ToDomain(FacultyDTO dto)
+        {
+            return new Faculty
+            {
+                Id = dto.Id,
+                Name = dto.Name
+            };
+        }
 
+        public static IEnumerable<Faculty> ToDomain(IEnumerable<FacultyDTO> dtos)
+            => dtos.Select(domain =>
+                new Faculty
+                {
+                    Id = domain.Id,
+                    Name = domain.Name,
+                    Specialities = domain.Specialities.Select(s =>
+                    new Specialty
+                    {
+                        CreateAt = s.CreateAt,
+                        EducationType = s.EducationType,
+                        ExtrabudgetaryPlaces = s.ExtrabudgetaryPlaces,
+                        FacultyId = s.FacultyId,
+                        GeneralCompetition = s.GeneralCompetition,
+                        Id = s.Id,
+                        Name = s.Name,
+                        QuotaLOP = s.QuotaLOP,
+                        SpecialQuota = s.SpecialQuota,
+                        TargetAdmissionQuota = s.TargetAdmissionQuota
+                    }).ToList()
+                });
+
+        public async Task<FacultyDTO> SaveAsync(FacultyDTO value)
+        {
+            Faculty faculty = ToDomain(value); ;
+            faculty.Specialities = null;
+            if (value.Id > 0)
+            {
+                _dbContext.Entry<Faculty>(faculty).State = EntityState.Modified;
+            }
+            else
+            {
+                _dbContext.Faculties.Add(faculty);
+            }
+            await _dbContext.SaveChangesAsync();
+            return ToDTO(faculty);
+        }
     }
 }

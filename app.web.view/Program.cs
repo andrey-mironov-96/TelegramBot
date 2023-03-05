@@ -1,8 +1,16 @@
+using app.domain.Abstract;
+using app.domain.Data.Utils.Configure;
+using app.domain.Services;
+using BusinesDAL.Abstract;
+using BusinesDAL.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddScoped<IFacultyBusinessService, FacultyBusinessService>();
+builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+DatabaseConfigure.Build(builder.Services);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

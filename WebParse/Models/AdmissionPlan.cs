@@ -12,6 +12,8 @@ namespace WebParse.Models
         public int ExtrabudgetaryPlaces { get; set; }
         public TypeEducation TypeEducation { get; set; }
 
+        public long Price {get;set;}
+
         public string FacultetName {get;set;}
 
         public override string ToString()

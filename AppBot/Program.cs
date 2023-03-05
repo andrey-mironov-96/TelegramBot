@@ -30,7 +30,9 @@ public class Program
                     services.AddScoped<UpdateHandler>();
                     services.AddScoped<ReceiverService>();
                     services.AddHostedService<PollingService>();
-                    services.AddScoped<IAdmissionPlanService, AdmissionPlanService>();
+                   services.AddScoped<IBusinessBotService, BusinessBotService>();
+                   services.AddScoped<IBotService, BotService>();
+                    services.AddScoped<IProfTestService, ProfTestService>();
                     services.AddScoped<IFuzzyService, FuzzyService>();
                     services.AddScoped<IFacultyRepository, FacultyRepository>();
                     WebParse.Configure.WebParseConfigure.Build(services);
