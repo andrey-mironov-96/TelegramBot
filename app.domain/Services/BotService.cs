@@ -10,7 +10,6 @@ namespace app.domain.Services
     {
         private const string CHOOSE_SPECIALITY = "Выберите интересующую специальнось";
         private const string CHOOSE_FACULTY = "Выберите интересующий факультет";
-        private const string KEY_FACULTYIES = "facultyies";
         private readonly IStateService stateService;
         private readonly IFacultyRepository fRepository;
         public BotService(IStateService stateService, IFacultyRepository fRepository)
@@ -48,7 +47,7 @@ namespace app.domain.Services
             }
             else if (stateValue.activeBlockType == ActiveBlockType.Faculty)
             {
-                IEnumerable<FacultyDTO> faculties = await stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(KEY_FACULTYIES);
+                IEnumerable<FacultyDTO> faculties = await stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(stateService.facultyKey);
                 if (faculties is null || faculties.Count() == 0)
                 {
                     faculties = await fRepository.GetAsync();
@@ -89,11 +88,11 @@ namespace app.domain.Services
                 stateValue = InitUserState();
             }
             stateValue.activeBlockType = ActiveBlockType.Faculty;
-            IEnumerable<FacultyDTO> faculties = await stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(KEY_FACULTYIES);
+            IEnumerable<FacultyDTO> faculties = await stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(stateService.facultyKey);
             if (faculties is null || faculties.Count() == 0)
             {
                 faculties = await fRepository.GetAsync();
-                await stateService.SetKeyAsync<IEnumerable<FacultyDTO>>(faculties, KEY_FACULTYIES);
+                await stateService.SetKeyAsync<IEnumerable<FacultyDTO>>(faculties, stateService.facultyKey);
 
             }
             await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
@@ -116,7 +115,7 @@ namespace app.domain.Services
 
         private async Task<MessageDTO> FacultyJob(StateValue stateValue, long userId, string message)
         {
-            IEnumerable<FacultyDTO> faculties = await this.stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(KEY_FACULTYIES);
+            IEnumerable<FacultyDTO> faculties = await this.stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(stateService.facultyKey);
             long currentFacultyId = 0;
             FacultyDTO currentFaculty = null;
             List<SpecialtyDTO> specialties = null;

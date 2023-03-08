@@ -7,5 +7,8 @@ namespace app.domain.Abstract
     {
         Task<bool> SetKeyAsync<T>(T value, string key);
         Task<T> GetKeyAsync<T>(string key);
+        public Task<bool> RemoveKey(string key);
+
+        public string facultyKey {get;}
     }
 }

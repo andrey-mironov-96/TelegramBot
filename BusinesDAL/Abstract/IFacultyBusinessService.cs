@@ -1,6 +1,5 @@
 using app.common.DTO;
 using app.common.Utils.Abstract;
-using app.common.DTO;
 
 namespace BusinesDAL.Abstract
 {

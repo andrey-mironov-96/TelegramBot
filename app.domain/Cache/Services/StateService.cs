@@ -10,6 +10,9 @@ namespace app.domain.Cache.Services
         private readonly ILogger<StateService> _logger;
         private readonly IDatabase _cache;
         private const int expiry = 120;
+
+        public string facultyKey => "facultyies";
+
         public StateService(ILogger<StateService> logger, IConnectionMultiplexer conMultiplexer)
         {
             _logger = logger;
@@ -34,8 +37,12 @@ namespace app.domain.Cache.Services
                 return data;
             }
             return default;
+        }
 
-
+        public async Task<bool> RemoveKey(string key)
+        {
+            await _cache.KeyDeleteAsync(key);
+            return true;
         }
     }
 }

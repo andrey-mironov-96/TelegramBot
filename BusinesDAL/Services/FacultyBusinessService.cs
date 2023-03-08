@@ -10,11 +10,16 @@ namespace BusinesDAL.Services
     {
         private readonly ILogger<FacultyBusinessService> logger;
         private readonly IFacultyRepository fRepository;
+        private readonly IStateService stateService;
 
-        public FacultyBusinessService(ILogger<FacultyBusinessService> logger, IFacultyRepository fRepository)
+        public FacultyBusinessService(
+            ILogger<FacultyBusinessService> logger, 
+            IFacultyRepository fRepository,
+            IStateService stateService)
         {
             this.logger = logger;
             this.fRepository = fRepository;
+            this.stateService = stateService;
         }
 
         public Task<bool> DeleteAsync(long id)
@@ -74,11 +79,13 @@ namespace BusinesDAL.Services
             }
         }
 
-        public Task<FacultyDTO> SaveAsync(FacultyDTO item)
+        public async Task<FacultyDTO> SaveAsync(FacultyDTO item)
         {
             try
             {
-                return this.fRepository.SaveAsync(item);
+                FacultyDTO faculty = await this.fRepository.SaveAsync(item);
+                await this.stateService.RemoveKey(this.stateService.facultyKey);
+                return faculty;
             }
             catch(Exception ex)
             {

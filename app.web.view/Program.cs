@@ -1,4 +1,5 @@
 using app.domain.Abstract;
+using app.domain.Cache.Configuration;
 using app.domain.Data.Utils.Configure;
 using app.domain.Services;
 using BusinesDAL.Abstract;
@@ -17,7 +18,7 @@ internal class Program
 
         builder.Services.AddScoped<ISpecialityBusinessService, SpecialityBusinessService>();
         builder.Services.AddScoped<ISpecialityRepository, SpecialityRepository>();
-
+        CacheConfigure.Build(builder.Services);
         DatabaseConfigure.Build(builder.Services);
         builder.Services.AddSwaggerGen();
         var app = builder.Build();
