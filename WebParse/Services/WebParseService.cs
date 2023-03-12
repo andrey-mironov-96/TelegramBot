@@ -73,20 +73,21 @@ namespace WebParse.Services
                         {
                             if (block.Contains("<td>"))
                             {
-                                string[] spliting = block.Split(new string[] { "<td>", "</td>" }, StringSplitOptions.None);
-                                admissionPlans.Add(new AdmissionPlan
+                                if (!block.Contains("</strong>"))
                                 {
-                                    SpecialtyName = RemoveDirtInString(spliting[1]),
-                                    GeneralCompetition = ParseAdmision(spliting[3]),
-                                    QuotaLOP = ParseAdmision(spliting[5]),
-                                    TargetAdmissionQuota = ParseAdmision(spliting[7]),
-                                    SpecialQuota = ParseAdmision(spliting[9]),
-                                    ExtrabudgetaryPlaces = ParseAdmision(spliting[11]),
-                                    TypeEducation = type,
-                                    FacultetName = RemoveDirtInString(facultetName)
-                                });
-
-
+                                    string[] spliting = block.Split(new string[] { "<td>", "</td>" }, StringSplitOptions.None);
+                                    admissionPlans.Add(new AdmissionPlan
+                                    {
+                                        SpecialtyName = RemoveDirtInString(spliting[1]),
+                                        GeneralCompetition = ParseAdmision(spliting[3]),
+                                        QuotaLOP = ParseAdmision(spliting[5]),
+                                        TargetAdmissionQuota = ParseAdmision(spliting[7]),
+                                        SpecialQuota = ParseAdmision(spliting[9]),
+                                        ExtrabudgetaryPlaces = ParseAdmision(spliting[11]),
+                                        TypeEducation = type,
+                                        FacultetName = RemoveDirtInString(facultetName)
+                                    });
+                                }
                             }
                         }
                     }
@@ -140,6 +141,15 @@ namespace WebParse.Services
             Regex regexRMColspan = new Regex("\\s*colspan=\\\\\\\"\\d*\\\\\\\"\\s*>");
             prepareTable = regexRMColspan.Replace(prepareTable, ">");
 
+            Regex regexRmStyle2 = new Regex("\\s*style=\\\\\\\"\\S*\\s*\\d*\\\\\\\"\\s*");
+            prepareTable = regexRmStyle2.Replace(prepareTable, "");
+
+            Regex regexRmStyle3 = new Regex("\\s*style=\\\\\\\"\\S*\\s*\\S*\\s*\\S*\\s*");
+            prepareTable = regexRmStyle3.Replace(prepareTable, "");
+
+            Regex regexRmBr = new Regex("<br>");
+            prepareTable = regexRmBr.Replace(prepareTable, "");
+
             string[] rows = prepareTable.Split(new string[] { "<tr>", "</tr>" }, StringSplitOptions.RemoveEmptyEntries);
             rows = rows.Where(row => row.Trim().Length != 0).ToArray().Where((item, index) => index > 2).Select(row => row.Trim()).ToArray();
             if (rows.Length == 0)
@@ -165,17 +175,18 @@ namespace WebParse.Services
                 colums[0] = regRmSpeces.Replace(colums[0], " ");
                 if (colums.Length == 1)
                 {
-                    if (colums[0].ToLower().Contains("очная"))
+                    if (colums[0].ToLower().Contains("очно-заочная"))
                     {
-                        typeEducation = TypeEducation.FullTime;
+                        typeEducation = TypeEducation.PartTime;
                     }
                     else if (colums[0].ToLower().Contains("заочная форма"))
                     {
                         typeEducation = TypeEducation.Distance;
                     }
-                    else if (colums[0].ToLower().Contains("очно-заочная"))
+                    else if (colums[0].ToLower().Contains("очная"))
                     {
-                        typeEducation = TypeEducation.PartTime;
+                        typeEducation = TypeEducation.FullTime;
+
                     }
                     else
                     {
@@ -218,14 +229,22 @@ namespace WebParse.Services
                         });
                         continue;
                     }
-                    AdmissionPlan speciality = faculty.Value.SingleOrDefault(spec => spec.TypeEducation == typeEducation && spec.SpecialtyName.ToLower() == colums[0].ToLower());
+                    AdmissionPlan speciality = faculty.Value.FirstOrDefault(spec => spec.TypeEducation == typeEducation && spec.SpecialtyName.Split(" ")[0] == colums[0].Split(" ")[0]);
+
                     if (speciality is null)
                     {
                         parsingResult.ResultParse = false;
+                        string typeEdu = typeEducation switch
+                        {
+                            TypeEducation.FullTime => "очное",
+                            TypeEducation.Distance => "заочное",
+                            TypeEducation.PartTime => "очно-заочное",
+                            _ => "не определено"
+                        };
                         parsingResult.StackTraces.Add(new StackTraceDTO()
                         {
                             Step = "Шаг 2. Получение стоимости обучения",
-                            Error = $"Не найдена специальность \"{colums[0]}\" факультета \"{nameFaculty}\"",
+                            Error = $"Не найдена специальность \"{colums[0]}\" факультета \"{nameFaculty}\" тип обучения:{typeEdu}",
                             Identity = Guid.NewGuid()
                         });
                         continue;

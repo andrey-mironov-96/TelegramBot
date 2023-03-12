@@ -75,6 +75,9 @@ public class WebParseServiceTest : ABaseTest<IWebParseService>
         try
         {
            ParsingResult<Dictionary<string, List<AdmissionPlan>>> result = await webParseService.GetDataFromULGUSite();
+           var all =  result.Data.SelectMany(s => s.Value).ToList();
+           var x = result.Data.SelectMany(s => s.Value).Where(w => w.Price == 0).ToList();
+           var proc = (x.Count/all.Count)*100;
         }
         catch (Exception e)
         {

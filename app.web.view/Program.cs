@@ -4,6 +4,8 @@ using app.domain.Data.Utils.Configure;
 using app.domain.Services;
 using BusinesDAL.Abstract;
 using BusinesDAL.Services;
+using WebParse.Business;
+using WebParse.Services;
 
 internal class Program
 {
@@ -18,6 +20,7 @@ internal class Program
 
         builder.Services.AddScoped<ISpecialityBusinessService, SpecialityBusinessService>();
         builder.Services.AddScoped<ISpecialityRepository, SpecialityRepository>();
+        builder.Services.AddScoped<IWebParseService, WebParseService>();
         CacheConfigure.Build(builder.Services);
         DatabaseConfigure.Build(builder.Services);
         builder.Services.AddSwaggerGen();
