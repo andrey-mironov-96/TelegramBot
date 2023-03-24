@@ -244,7 +244,7 @@ namespace WebParse.Services
                         parsingResult.StackTraces.Add(new StackTraceDTO()
                         {
                             Step = "Шаг 2. Получение стоимости обучения",
-                            Error = $"Не найдена специальность \"{colums[0]}\" факультета \"{nameFaculty}\" тип обучения:{typeEdu}",
+                            Error = $"Не найдена специальность {colums[0]} факультета {nameFaculty} тип обучения:{typeEdu}",
                             Identity = Guid.NewGuid()
                         });
                         continue;
