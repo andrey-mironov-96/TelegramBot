@@ -13,10 +13,10 @@
 
   <ItemGroup>
     <PackageReference Include="Telegram.Bot" Version="19.0.0-preview.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.86" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.96" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BusinesDAL\BusinesDAL.csproj" />

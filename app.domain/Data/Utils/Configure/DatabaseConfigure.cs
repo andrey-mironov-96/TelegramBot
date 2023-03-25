@@ -12,7 +12,7 @@ namespace app.domain.Data.Utils.Configure
         public static void Build(IServiceCollection services)
         {
             //TODO:remove test connection string
-            Environment.SetEnvironmentVariable("Database",$"Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = telegram_bot");
+            Environment.SetEnvironmentVariable("Database",$"Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = bot");
             string connectionString = EnvironmentConfigure.GetEnvironment(ConnectionStringEnum.Database);
             if (String.IsNullOrEmpty(connectionString) || String.IsNullOrWhiteSpace(connectionString))
             {
@@ -22,7 +22,7 @@ namespace app.domain.Data.Utils.Configure
             {
                 options.UseNpgsql(connectionString, db =>
                 {
-                    db.MigrationsAssembly("app.view");
+                    db.MigrationsAssembly("app.domain");
                     db.EnableRetryOnFailure();
                 }).LogTo(Console.WriteLine, LogLevel.Information);
                 options.EnableSensitiveDataLogging();

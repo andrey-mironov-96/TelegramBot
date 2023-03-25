@@ -23,7 +23,7 @@ namespace app.test.core.Utils
         public AppDbContext GetAppDbContext()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql("Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = telegram_bot")
+                .UseNpgsql("Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = bot")
                 .LogTo(Console.WriteLine, LogLevel.Information);
             return new AppDbContext(options.Options);
         }
@@ -83,6 +83,11 @@ namespace app.test.core.Utils
             return new BusinessBotService(
                 GetBotService()
             );
+        }
+
+        protected ITestRepository GetTestRepository()
+        {
+            return new TestRepository(this.GetAppDbContext());
         }
     }
 }
