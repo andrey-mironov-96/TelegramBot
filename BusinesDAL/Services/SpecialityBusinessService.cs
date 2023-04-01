@@ -88,5 +88,17 @@ namespace BusinesDAL.Services
                 throw ex;
             }
         }
+        public Task<IEnumerable<SpecialtyDTO>> GetSpecialtiesAsync()
+        {
+            try
+            {
+                return this.repository.GetAsync();
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, ex.Message);
+                throw ex;
+            }
+        }
     }
 }

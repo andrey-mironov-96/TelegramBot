@@ -21,10 +21,10 @@ public class WebParseServiceTest : ABaseTest<IWebParseService>
     public void GetFacultiesAndSpecialities()
     {
         IWebParseService webParse = this.GetCurrentService();
-        const string linkForParse = "https://abiturient.ulsu.ru/tiles/documents/86";
+       
         Dictionary<string, List<AdmissionPlan>> admissionPlans = webParse.GetFacultiesAndSpecialitiesAsync().Result;
         var options = new DbContextOptionsBuilder<AppDbContext>()
-         .UseNpgsql("Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = telegram_bot")
+         .UseNpgsql("Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = bot")
          .LogTo(Console.WriteLine, LogLevel.Information);
 
 

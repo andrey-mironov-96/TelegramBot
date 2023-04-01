@@ -23,6 +23,13 @@ namespace app.web.view.Controllers
             PageableData<SpecialtyDTO> result = await this.businessService.GetPageSpecialityOfFacultyAsync(data,id);
             return Ok(result);
         }
+
+        [HttpGet, Route("get-all")]
+        public async Task<ActionResult<PageableData<SpecialtyDTO>>> GetSpecialities()
+        {
+            IEnumerable<SpecialtyDTO> result = await this.businessService.GetSpecialtiesAsync();
+            return Ok(result);
+        }
         
     }
 }

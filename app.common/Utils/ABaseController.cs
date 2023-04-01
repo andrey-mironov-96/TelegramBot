@@ -10,8 +10,8 @@ namespace app.common.Utils
         where TDTO : ABaseDTOEntity
 
     {
-        private readonly ILogger<TController> logger;
-        private readonly TBusinessService businessService;
+        protected readonly ILogger<TController> logger;
+        protected readonly TBusinessService businessService;
 
         public ABaseController(ILogger<TController> logger, TBusinessService businessService)
         {

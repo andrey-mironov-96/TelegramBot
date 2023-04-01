@@ -1,7 +1,6 @@
 ﻿using app.common.DTO;
 using app.common.Utils;
 using BusinesDAL.Abstract;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace app.web.view.Controllers
@@ -12,6 +11,12 @@ namespace app.web.view.Controllers
     {
         public TestController(ILogger<TestController> logger, ITestBusinessService businessService) : base(logger, businessService)
         {
+        }
+
+        [HttpPost, Route("page")]
+        public async Task<ActionResult<PageableData<TestDTO>>> GetPage([FromBody] PageableData<TestDTO> data)
+        {
+            return Ok(await this.businessService.GetPage(data));
         }
     }
 }

@@ -21,6 +21,10 @@ internal class Program
         builder.Services.AddScoped<ISpecialityBusinessService, SpecialityBusinessService>();
         builder.Services.AddScoped<ISpecialityRepository, SpecialityRepository>();
         builder.Services.AddScoped<IWebParseService, WebParseService>();
+        builder.Services.AddScoped<ITestBusinessService, TestBusinessService>();
+        builder.Services.AddScoped<ITestRepository, TestRepository>();
+        builder.Services.AddScoped<ITestScoreBusinessService, TestScoreBusinessService>();
+        builder.Services.AddScoped<ITestScoreRepository, TestScoreRepository>();
         CacheConfigure.Build(builder.Services);
         DatabaseConfigure.Build(builder.Services);
         builder.Services.AddSwaggerGen();
