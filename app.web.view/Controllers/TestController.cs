@@ -13,10 +13,10 @@ namespace app.web.view.Controllers
         {
         }
 
-        [HttpPost, Route("page")]
-        public async Task<ActionResult<PageableData<TestDTO>>> GetPage([FromBody] PageableData<TestDTO> data)
-        {
-            return Ok(await this.businessService.GetPage(data));
-        }
+        // [HttpPost, Route("page")]
+        // public async Task<ActionResult<PageableData<TestDTO>>> GetPage([FromBody] PageableData<TestDTO> data)
+        // {
+        //     return Ok(await this.businessService.GetPage(data));
+        // }
     }
 }

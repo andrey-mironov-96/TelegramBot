@@ -21,7 +21,7 @@ public class WebParseServiceTest : ABaseTest<IWebParseService>
     public void GetFacultiesAndSpecialities()
     {
         IWebParseService webParse = this.GetCurrentService();
-       
+
         Dictionary<string, List<AdmissionPlan>> admissionPlans = webParse.GetFacultiesAndSpecialitiesAsync().Result;
         var options = new DbContextOptionsBuilder<AppDbContext>()
          .UseNpgsql("Server = localhost; User Id = bot; Password = bot; Port = 5432; Database = bot")
@@ -72,22 +72,10 @@ public class WebParseServiceTest : ABaseTest<IWebParseService>
     public async Task GetDataFromULGUSiteTest()
     {
         IWebParseService webParseService = GetCurrentService();
-        try
-        {
-           ParsingResult<Dictionary<string, List<AdmissionPlan>>> result = await webParseService.GetDataFromULGUSite();
-           var all =  result.Data.SelectMany(s => s.Value).ToList();
-           var x = result.Data.SelectMany(s => s.Value).Where(w => w.Price == 0).ToList();
-           var proc = (x.Count/all.Count)*100;
-        }
-        catch (Exception e)
-        {
-            
-        }
-
-
-
-
-
+        ParsingResult<Dictionary<string, List<AdmissionPlan>>> result = await webParseService.GetDataFromULGUSite();
+        var all = result.Data.SelectMany(s => s.Value).ToList();
+        var x = result.Data.SelectMany(s => s.Value).Where(w => w.Price == 0).ToList();
+        var proc = (x.Count / all.Count) * 100;
     }
 
 

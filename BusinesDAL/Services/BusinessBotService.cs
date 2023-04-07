@@ -98,7 +98,7 @@ namespace BusinesDAL.Services
                 MessageDTO workResult = await botService.DoWork(userId, message);
                 return workResult;
             }
-            catch (EmptyStateException ex)
+            catch (EmptyStateException)
             {
                 return new MessageDTO()
                 {

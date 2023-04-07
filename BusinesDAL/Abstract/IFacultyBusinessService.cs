@@ -9,6 +9,6 @@ namespace BusinesDAL.Abstract
 
         Task<FacultyDTO> GetFacultyAsync(long id);
 
-        Task<FacultyDTO> SaveAsync(FacultyDTO faculty);
+        // Task<FacultyDTO> SaveAsync(FacultyDTO faculty);
     }
 }
