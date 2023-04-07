@@ -11,6 +11,8 @@ namespace app.common.Utils
         public int Page { get; set; }
         public int PageSize { get; set; }
         public int Total { get; set; }
+
+        public Filter[] Filters { get; set; }
         public IEnumerable<TDTO> Data { get; set; }
         public PageableData(int page, int pageSize, int total)
         {

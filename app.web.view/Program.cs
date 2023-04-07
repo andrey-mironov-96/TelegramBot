@@ -25,6 +25,9 @@ internal class Program
         builder.Services.AddScoped<ITestRepository, TestRepository>();
         builder.Services.AddScoped<ITestScoreBusinessService, TestScoreBusinessService>();
         builder.Services.AddScoped<ITestScoreRepository, TestScoreRepository>();
+
+        builder.Services.AddScoped<IQuestionBusinessService, QuestionBusinessService>();
+        builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
         CacheConfigure.Build(builder.Services);
         DatabaseConfigure.Build(builder.Services);
         builder.Services.AddSwaggerGen();
