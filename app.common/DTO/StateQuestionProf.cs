@@ -2,8 +2,8 @@ namespace app.common.DTO
 {
     public class StateQuestionProf
     {
-        public QuestionProf CurrentQuestion { get; set; }
+        public QuestionDTO CurrentQuestion { get; set; }
         public short CurrentPosition { get; set; }
-        public List<QuestionProf> Questions { get; set; }
+        public List<QuestionDTO> Questions { get; set; }
     }
 }

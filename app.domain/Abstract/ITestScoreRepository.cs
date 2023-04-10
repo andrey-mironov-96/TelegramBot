@@ -7,5 +7,7 @@ namespace app.domain.Abstract
     public interface ITestScoreRepository : IRepository<TestScore, TestScoreDTO>
     {
         Task<PageableData<TestScoreDTO>> GetPage(PageableData<TestScoreDTO> data);
+
+       public IEnumerable<TestScoreDTO> GetByTestId(long testId);
     }
 }

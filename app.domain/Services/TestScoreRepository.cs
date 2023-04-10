@@ -43,6 +43,12 @@ namespace app.domain.Services
             return ToDTO(await database.TestScores.AsNoTracking().SingleOrDefaultAsync(spec => spec.Id == id));
         }
 
+        public IEnumerable<TestScoreDTO> GetByTestId(long testId)
+        {
+            List<TestScore> tests = database.TestScores.AsNoTracking().Where(test => test.TestId == testId && test.IsDeleted == false).ToList();
+            return ToDTO(tests);
+        }
+
         public async Task<TestScoreDTO> SaveAsync(TestScoreDTO value)
         {
             TestScore testScore = ToDomain(value);
@@ -63,14 +69,18 @@ namespace app.domain.Services
         public async Task<PageableData<TestScoreDTO>> GetPage(PageableData<TestScoreDTO> data)
         {
             int offset = (data.Page - 1) * data.PageSize;
-            List<TestScore> result = await database.TestScores
-                .Where(test => !test.IsDeleted)
-                .Skip(offset)
+            IQueryable<TestScore> query = database.TestScores
+                .Where(test => !test.IsDeleted);
+            query = AddFilters(query, data.Filters);
+            List<TestScore> result = await query.Skip(offset)
                 .Take(data.PageSize)
                 .ToListAsync();
-            data.Total = await database.TestScores
-            .Where(speciality => !speciality.IsDeleted)
-            .CountAsync();
+
+            
+            IQueryable<TestScore> queryTotal = database.TestScores
+                .Where(speciality => !speciality.IsDeleted);
+            queryTotal = AddFilters(queryTotal, data.Filters);
+            data.Total = await queryTotal.CountAsync();
             data.Data = ToDTO(result);
             return data;
         }
@@ -111,7 +121,7 @@ namespace app.domain.Services
                 To = dto.To,
                 ChangeAt = dto.ChangeAt,
                 CreateAt = dto.CreateAt,
-                Id = dto.Id 
+                Id = dto.Id
             };
         }
 
@@ -123,6 +133,23 @@ namespace app.domain.Services
         private IEnumerable<TestScoreDTO> ToDTO(IEnumerable<TestScore> dtos)
         {
             return dtos.Select(test => ToDTO(test));
+        }
+
+        private IQueryable<TestScore> AddFilters(IQueryable<TestScore> query, Filter[] filters)
+        {
+            if (filters != null)
+            {
+                foreach (Filter filter in filters)
+                {
+                    switch (filter.Field)
+                    {
+                        case "testId":
+                            query = query.Where(q => q.TestId == Int32.Parse(filter.Value));
+                            break;
+                    }
+                }
+            }
+            return query;
         }
     }
 }

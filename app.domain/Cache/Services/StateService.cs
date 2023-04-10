@@ -21,7 +21,9 @@ namespace app.domain.Cache.Services
        
         public async Task<bool> SetKeyAsync<T>(T value, string key)
         {
-            string strData = JsonConvert.SerializeObject(value);
+            string strData = JsonConvert.SerializeObject(value, new JsonSerializerSettings(){
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
             await _cache.StringSetAsync(key, strData);
             await _cache.KeyExpireAsync(key, TimeSpan.FromHours(expiry));
             return true;

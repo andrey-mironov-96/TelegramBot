@@ -4,6 +4,8 @@ namespace app.common.Utils.Enums
     {
         None,
         Faculty,
-        ProfTest
+        ChooseProfTest,
+        SelectedProfTest,
+        RunProfTest,
     }
 }

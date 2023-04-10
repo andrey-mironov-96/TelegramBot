@@ -10,5 +10,7 @@ namespace app.common.DTO
         public short Position { get; set; }
         public List<AnswerDTO> Answers { get; set; }
 
+        public AnswerDTO UserChoose { get; set; }
+
     }
 }

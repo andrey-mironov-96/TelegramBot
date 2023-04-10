@@ -86,6 +86,12 @@ namespace app.domain.Services
             return data;
         }
 
+        public async Task<List<TestDTO>> Get()
+        {
+            List<Test> tests = await this.dbContext.Tests.AsNoTracking().ToListAsync();
+            return ToDTO(tests);
+        }
+
         public async Task<TestDTO> SaveAsync(TestDTO value)
         {
             Test test = ToDomain(value);

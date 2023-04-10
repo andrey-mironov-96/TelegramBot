@@ -9,5 +9,6 @@ namespace app.domain.Abstract
         Task<PageableData<QuestionDTO>> GetPage(PageableData<QuestionDTO> data);
 
         public short GetNextQuestionPosition();
+        IEnumerable<QuestionDTO> GetQuestionsOfTest(long testId);
     }
 }

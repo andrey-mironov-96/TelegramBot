@@ -165,6 +165,14 @@ namespace app.domain.Services
             return data;
         }
 
+        public IEnumerable<QuestionDTO> GetQuestionsOfTest(long testId)
+        {
+           List<Question> questions = this.database.Questions
+           .Include(question => question.Answers.Where(a => !a.IsDeleted).OrderBy(a => a.Point))
+           .AsNoTracking().Where(question => question.IsDeleted == false && question.TestId == testId).ToList();
+           return ToDTO(questions);
+        }
+
         private IQueryable<Question> AddFilters(IQueryable<Question> query, Filter[] filters)
         {
             if (filters != null)
@@ -181,5 +189,7 @@ namespace app.domain.Services
             }
             return query;
         }
+
+       
     }
 }

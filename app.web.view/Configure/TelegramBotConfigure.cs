@@ -1,26 +1,17 @@
 using app.domain.Abstract;
-using app.domain.Cache.Configuration;
-using app.domain.Data.Utils.Configure;
 using app.domain.Services;
-using app.web.view.Configure;
 using app.web.view.Services;
 using BusinesDAL.Abstract;
 using BusinesDAL.Services;
 using Telegram.Bot;
-using WebParse.Business;
-using WebParse.Services;
-using static app.web.view.Configure.TelegramBotConfigure;
 
-internal class Program
+namespace app.web.view.Configure
 {
-    private static void Main(string[] args)
+    public class TelegramBotConfigure
     {
-        var builder = WebApplication.CreateBuilder(args);
-        
-        // Add services to the container.
-        builder.Services.AddControllers();
-
-        builder.Services.Configure<BotConfiguration>(
+        public static void Configure(WebApplicationBuilder builder)
+        {
+            builder.Services.Configure<BotConfiguration>(
                    builder.Configuration.GetSection(BotConfiguration.Configuration));
 
             builder.Services.AddHttpClient("telegram_bot_client")
@@ -48,34 +39,12 @@ internal class Program
             builder.Services.AddScoped<ITestScoreRepository, TestScoreRepository>();
             builder.Services.AddScoped<IQuestionBusinessService, QuestionBusinessService>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-        //TelegramBotConfigure.Configure(builder);
-        // DataLayerConfigure.Configure(builder.Services);
-
-        CacheConfigure.Build(builder.Services);
-        DatabaseConfigure.Build(builder.Services);
-
-        builder.Services.AddSwaggerGen();
-
-        var app = builder.Build();
-
-        // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "app.web.view v1"));
         }
 
-        app.UseStaticFiles();
-
-        app.UseRouting();
-
-        app.UseAuthorization();
-
-        app.UseEndpoints(endpoint =>
+        public class BotConfiguration
         {
-            endpoint.MapControllers();
-        });
-        app.Run();
+            public static readonly string Configuration = "BotConfiguration";
+            public string BotToken { get; set; } = "";
+        }
     }
 }

@@ -7,5 +7,7 @@ namespace app.domain.Abstract
     public interface ITestRepository : IRepository<Test, TestDTO>
     {
         public Task<PageableData<TestDTO>> GetPageableDataAsync(PageableData<TestDTO> data);
+
+        public Task<List<TestDTO>> Get();
     }
 }

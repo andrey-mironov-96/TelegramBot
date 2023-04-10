@@ -1,4 +1,5 @@
 using app.common.DTO;
+using app.common.Utils;
 using app.common.Utils.CustomException;
 using app.common.Utils.Enums;
 using app.domain.Abstract;
@@ -12,10 +13,21 @@ namespace app.domain.Services
         private const string CHOOSE_FACULTY = "Выберите интересующий факультет";
         private readonly IStateService stateService;
         private readonly IFacultyRepository fRepository;
-        public BotService(IStateService stateService, IFacultyRepository fRepository)
+        private readonly ITestRepository testRepository;
+        private readonly IQuestionRepository questionRepository;
+        private readonly ITestScoreRepository testScoreRepository;
+        public BotService(
+            IStateService stateService,
+            IFacultyRepository fRepository,
+            ITestRepository testRepository,
+            IQuestionRepository questionRepository,
+            ITestScoreRepository testScoreRepository)
         {
             this.stateService = stateService;
             this.fRepository = fRepository;
+            this.testRepository = testRepository;
+            this.questionRepository = questionRepository;
+            this.testScoreRepository = testScoreRepository;
         }
 
         public async Task<MessageDTO> DoWork(long userId, string message)
@@ -28,7 +40,10 @@ namespace app.domain.Services
             Task<MessageDTO> action = stateValue.activeBlockType switch
             {
                 ActiveBlockType.Faculty => this.FacultyJob(stateValue, userId, message),
-                ActiveBlockType.ProfTest => this.ProfTestJob(stateValue, userId, message)
+                ActiveBlockType.SelectedProfTest or
+                ActiveBlockType.ChooseProfTest or
+                ActiveBlockType.RunProfTest  => this.ProfTestJob(stateValue, userId, message),
+                _ => Task.FromResult(this.GetBaseMessage())
             };
             return await action;
         }
@@ -40,42 +55,47 @@ namespace app.domain.Services
             {
                 throw new EmptyStateException();
             }
-            if (stateValue.activeBlockType == ActiveBlockType.ProfTest)
+            switch (stateValue.activeBlockType)
             {
-                stateValue = InitUserState();
-                await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
-            }
-            else if (stateValue.activeBlockType == ActiveBlockType.Faculty)
-            {
-                IEnumerable<FacultyDTO> faculties = await stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(stateService.facultyKey);
-                if (faculties is null || faculties.Count() == 0)
-                {
-                    faculties = await fRepository.GetAsync();
-                }
-                MessageDTO resultMessage = null;
-                switch (stateValue.stateFaculty.currectStep)
-                {
-                    case StateType.None:
-                    case StateType.Faculty:
-                        stateValue.stateFaculty.ActiveFaculty = null;
-                        stateValue.stateFaculty.currectStep = StateType.None;
-                        stateValue.stateFaculty.ActiveSpeciality = null;
-                        resultMessage = this.GetBaseMessage();
-                        break;
-                    case StateType.Speciality:
-                    case StateType.Information:
-                        stateValue.stateFaculty.ActiveFaculty = null;
-                        stateValue.stateFaculty.currectStep = StateType.Faculty;
-                        stateValue.stateFaculty.ActiveSpeciality = null;
-                        resultMessage = new MessageDTO()
+                case ActiveBlockType.ChooseProfTest:
+                case ActiveBlockType.SelectedProfTest:
+                case ActiveBlockType.RunProfTest:
+                    stateValue = this.InitUserState();
+                    await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+                    return GetBaseMessage();
+                case ActiveBlockType.Faculty:
+                    {
+                        IEnumerable<FacultyDTO> faculties = await stateService.GetKeyAsync<IEnumerable<FacultyDTO>>(stateService.facultyKey);
+                        if (faculties is null || faculties.Count() == 0)
                         {
-                            Message = CHOOSE_FACULTY,
-                            KeyboardMarkup = GenerateKeyboardMarkup(faculties.Select(s => s.Name).ToArray())
-                        };
-                        break;
-                }
-                await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
-                return resultMessage;
+                            faculties = await fRepository.GetAsync();
+                        }
+                        MessageDTO resultMessage = null;
+                        switch (stateValue.stateFaculty.currectStep)
+                        {
+                            case StateType.None:
+                            case StateType.Faculty:
+                                stateValue.stateFaculty.ActiveFaculty = null;
+                                stateValue.stateFaculty.currectStep = StateType.None;
+                                stateValue.stateFaculty.ActiveSpeciality = null;
+                                resultMessage = this.GetBaseMessage();
+                                break;
+                            case StateType.Speciality:
+                            case StateType.Information:
+                                stateValue.stateFaculty.ActiveFaculty = null;
+                                stateValue.stateFaculty.currectStep = StateType.Faculty;
+                                stateValue.stateFaculty.ActiveSpeciality = null;
+                                resultMessage = new MessageDTO()
+                                {
+                                    Message = CHOOSE_FACULTY,
+                                    KeyboardMarkup = GenerateKeyboardMarkup(faculties.Select(s => s.Name).ToArray())
+                                };
+                                break;
+                        }
+                        await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+                        return resultMessage;
+                    }
+
             }
             return this.GetBaseMessage();
         }
@@ -105,11 +125,7 @@ namespace app.domain.Services
             {
                 stateValue = InitUserState();
             }
-            stateValue.activeBlockType = ActiveBlockType.ProfTest;
-            List<QuestionProf> questions = InitQuestionsProf();
-            QuestionProf question = questions.First();
-            stateValue.activeBlockType = ActiveBlockType.ProfTest;
-            stateValue.stateQuestion.Questions = questions;
+            stateValue.activeBlockType = ActiveBlockType.ChooseProfTest;
             await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
         }
 
@@ -184,130 +200,131 @@ namespace app.domain.Services
             return resultMessage;
         }
 
-        private async Task<MessageDTO> ProfTestJob(StateValue stateValue, long userId, string message)
+        private Task<MessageDTO> ProfTestJob(StateValue stateValue, long userId, string message)
         {
-            stateValue.activeBlockType = ActiveBlockType.ProfTest;
-            MessageDTO resultMessage = null;
-            if (stateValue.stateQuestion.CurrentQuestion == null)
+            Task<MessageDTO> messageWithProfTest = stateValue.activeBlockType switch
             {
-                if (stateValue.stateQuestion.Questions == null || stateValue.stateQuestion.Questions.Count == 0)
+                ActiveBlockType.ChooseProfTest => this.ChoiseProfTestHandlerAsync(stateValue, userId, message),
+                ActiveBlockType.SelectedProfTest => this.SelectedProfTestHandlerAsync(stateValue, userId, message),
+                ActiveBlockType.RunProfTest => this.RunProfTestHandlerAsync(stateValue, userId, message),
+                _ => Task.FromResult(GetBaseMessage())
+            };
+            return messageWithProfTest;
+        }
+
+        private async Task<MessageDTO> ChoiseProfTestHandlerAsync(StateValue stateValue, long userId, string message)
+        {
+            List<TestDTO> listTests = await testRepository.Get();
+            stateValue.activeBlockType = ActiveBlockType.SelectedProfTest;
+            await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+            return new MessageDTO()
+            {
+                Message = $"Для успешного прохождения профифильного тестирования небходимо ответить на все вопросы." +
+    "Не переживайте, прохождение выбранного теста занимает не более 10 минут. \nДавайте выберем тест...",
+                KeyboardMarkup = this.GenerateKeyboardMarkup(listTests.Select(test => test.Title).ToArray())
+            };
+        }
+
+        private async Task<MessageDTO> SelectedProfTestHandlerAsync(StateValue stateValue, long userId, string message)
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                IEnumerable<TestDTO> tests = await this.testRepository.GetAsync();
+                TestDTO test = tests.FirstOrDefault(test => test.Title.Trim().ToUpper() == message.Trim().ToUpper());
+                if (test != null)
                 {
-                    stateValue.stateQuestion.Questions = InitQuestionsProf();
+                    stateValue.TestId = test.Id;
+                    await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+                    PageableData<QuestionDTO> data = await this.questionRepository.GetPage(new PageableData<QuestionDTO>(1, 1, 10)
+                    {
+                        Filters = new Filter[1] { new Filter() { Field = "testId", Value = test.Id.ToString() } }
+                    });
+                    stateValue.activeBlockType = ActiveBlockType.RunProfTest;
+                    await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+                    return new MessageDTO()
+                    {
+                        Message = $"Прохождение данного теста займет около {(data.Total * 20) / 60} минут. \n" +
+                        $"В тесте всего {data.Total} вопросов, ну что начнем?",
+                        KeyboardMarkup = this.GenerateKeyboardMarkup("Начать")
+                    };
                 }
-                stateValue.stateQuestion.CurrentQuestion = stateValue.stateQuestion.Questions.OrderBy(p => p.Position).First();
-                stateValue.stateQuestion.CurrentPosition = stateValue.stateQuestion.CurrentQuestion.Position;
-                resultMessage = new MessageDTO
+            }
+            stateValue.activeBlockType = ActiveBlockType.ChooseProfTest;
+            await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+            return await ProfTestJob(stateValue, userId, "Не могу найти тест, попробуй снова");
+        }
+
+        private async Task<MessageDTO> RunProfTestHandlerAsync(StateValue stateValue, long userId, string message)
+        {
+            List<QuestionDTO> questions = this.questionRepository.GetQuestionsOfTest(stateValue.TestId).OrderBy(q => q.Position).ToList();
+            if (message.Split(" ")[0].Trim().ToUpper().StartsWith("НАЧАТЬ"))
+            {
+                stateValue.stateQuestion = new StateQuestionProf();
+                stateValue.stateQuestion.Questions = questions;
+                stateValue.stateQuestion.CurrentQuestion = questions[0];
+                stateValue.stateQuestion.CurrentPosition = questions[0].Position;
+                await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+                return new MessageDTO()
                 {
-                    Message = $"Вопрос {stateValue.stateQuestion.CurrentPosition} из {stateValue.stateQuestion.Questions.Count}\n{stateValue.stateQuestion.CurrentQuestion.Question}",
-                    KeyboardMarkup = GenerateKeyboardMarkup(stateValue.stateQuestion.CurrentQuestion.Answers)
+                    Message = questions[0].Title,
+                    KeyboardMarkup = this.GenerateKeyboardMarkup(questions[0].Answers.Select(a => a.Text).ToArray())
+                };
+            }
+
+            QuestionDTO currentQuestion = stateValue.stateQuestion.CurrentQuestion;
+            AnswerDTO chooseAnswer = currentQuestion.Answers.FirstOrDefault(a => a.Text.Trim().ToUpper() == message.Trim().ToUpper());
+            if (chooseAnswer == null)
+            {
+                return new MessageDTO()
+                {
+                    Message = "Я вас не понимаю, попробуйте снова",
+                    KeyboardMarkup = GenerateKeyboardMarkup("Факультеты", "Тесты на проф. ориентацию")
+                };
+            }
+            stateValue.stateQuestion.Questions[currentQuestion.Position].UserChoose = chooseAnswer;
+            if (currentQuestion.Position + 1 < stateValue.stateQuestion.Questions.Count())
+            {
+                QuestionDTO nextQuestion = stateValue.stateQuestion.Questions.ElementAt(currentQuestion.Position + 1);
+                stateValue.stateQuestion.CurrentPosition = nextQuestion.Position;
+                stateValue.stateQuestion.CurrentQuestion = nextQuestion;
+                await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
+                return new MessageDTO()
+                {
+                    Message = nextQuestion.Title,
+                    KeyboardMarkup = this.GenerateKeyboardMarkup(nextQuestion.Answers.Select(a => a.Text).ToArray())
                 };
             }
             else
             {
-                QuestionProf currentQuestion = stateValue.stateQuestion.CurrentQuestion;
-                string userAnswer = currentQuestion.Answers.SingleOrDefault(a => a.ToLower() == message.ToLower());
-                if (string.IsNullOrWhiteSpace(userAnswer) || string.IsNullOrEmpty(userAnswer))
+                List<TestScoreDTO> testScores = this.testScoreRepository.GetByTestId(stateValue.TestId).ToList();
+                List<AnswerDTO> userAnswers = stateValue.stateQuestion.Questions.Select(s => s.UserChoose).ToList();
+                short userPoint = 0;
+                userAnswers.ForEach(answer => userPoint += answer.Point);
+                TestScoreDTO lookForTestScore = null;
+                testScores.ForEach(score =>
                 {
-                    resultMessage = this.NotUndestandMessageProfTest(stateValue);
+                    if (score.From <= userPoint && score.To >= userPoint)
+                    {
+                        lookForTestScore = score;
+                    }
+                });
+                if (lookForTestScore == null)
+                {
+                    return new MessageDTO()
+                    {
+                        Message = "Ой, ошибка в расчетах, уже устраняем проблему. Не переживайте, ваши результаты сохранены",
+                    };
                 }
                 else
                 {
-                    QuestionProf question = stateValue.stateQuestion.Questions.Single(q => q.Position == currentQuestion.Position);
-                    question.UserChoose = userAnswer;
-                    if (question.Position >= stateValue.stateQuestion.Questions.Count)
+                    return new MessageDTO()
                     {
-                        int[] answerYes = new int[] { 2, 5, 6, 8, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24, 25, 26, 27 };
-                        int userPoints = 0;
-                        foreach (QuestionProf itm in stateValue.stateQuestion.Questions)
-                        {
-                            if (answerYes.Contains(itm.Position) && itm.UserChoose == itm.Answers[0])
-                            {
-                                userPoints = userPoints + 2;
-                            }
-                            else if (itm.UserChoose == itm.Answers[1])
-                            {
-                                userPoints++;
-                            }
-                            else if (!answerYes.Contains(itm.Position) && itm.UserChoose == itm.Answers[2])
-                            {
-                                userPoints = userPoints + 2;
-                            }
-                        }
-                        if (userPoints >= 49) //&& userPoints <= 56
-                        {
-                            resultMessage = new MessageDTO
-                            {
-                                Message = $"Вы набарили {userPoints}.\n" +
-                                "Высокий интерес к знаковым системам.\n" +
-                                "Идеальные профессии – корректор, секретарь, экономист, чертежник, картограф",
-                                KeyboardMarkup = GenerateKeyboardMarkup(new string[0])
-                            };
-                        }
-                        else if (userPoints >= 37 && userPoints <= 48)
-                        {
-                            resultMessage = new MessageDTO
-                            {
-                                Message = $"Вы набарили {userPoints}.\n" +
-                                "Повышенный интерес к знаковым системам.\n" +
-                                "Лучше всего отдать предпочтение профессиям менеджера, юриста, финансиста, журналиста",
-                                KeyboardMarkup = GenerateKeyboardMarkup(new string[0])
-                            };
-                        }
-                        else if (userPoints >= 25 && userPoints <= 36)
-                        {
-                            resultMessage = new MessageDTO
-                            {
-                                Message = $"Вы набарили {userPoints}.\n" +
-                                "Определенные интересы к точным наукам.\n" +
-                                "Лучше всего отдать предпочтение профессиям связанные с точными науками: инженер, конструктор, программист, физик, математик",
-                                KeyboardMarkup = GenerateKeyboardMarkup(new string[0])
-                            };
-                        }
-                        else if (userPoints >= 13 && userPoints <= 24)
-                        {
-                            resultMessage = new MessageDTO
-                            {
-                                Message = $"Вы набарили {userPoints}.\n" +
-                                "Выраженный интерес к творчеству.\n" +
-                                "Лучшие сферы деятельности - продюсирование, реклама, дизайн, психология, журналистика и т.д.",
-                                KeyboardMarkup = GenerateKeyboardMarkup(new string[0])
-                            };
-                        }
-                        else if (userPoints >= 0 && userPoints <= 12)
-                        {
-                            resultMessage = new MessageDTO
-                            {
-                                Message = $"Вы набарили {userPoints}.\n" +
-                                "«Свободный художник».\n" +
-                                "В этом случае лучше всего работать индивидуальным предпринимателем или фрилансером",
-                                KeyboardMarkup = GenerateKeyboardMarkup(new string[0])
-                            };
-                        }
-                    }
-                    else
-                    {
-                        QuestionProf nextQuestion = stateValue.stateQuestion.Questions.Single(q => q.Position == currentQuestion.Position + 1);
-                        stateValue.stateQuestion.CurrentPosition = nextQuestion.Position;
-                        stateValue.stateQuestion.CurrentQuestion = nextQuestion;
-                        resultMessage = new MessageDTO
-                        {
-                            Message = $"Вопрос {stateValue.stateQuestion.CurrentPosition} из {stateValue.stateQuestion.Questions.Count}\n{stateValue.stateQuestion.CurrentQuestion.Question}",
-                            KeyboardMarkup = GenerateKeyboardMarkup(stateValue.stateQuestion.CurrentQuestion.Answers)
-                        };
-                    }
+                        Message = $"Вы набрали {userPoint} балов. \nРезультат тестирования:\n{lookForTestScore.Text}",
+                        KeyboardMarkup = GenerateKeyboardMarkup()
+                    };
                 }
             }
-            await stateService.SetKeyAsync<StateValue>(stateValue, userId.ToString());
-            return resultMessage;
-        }
 
-        private MessageDTO NotUndestandMessageProfTest(StateValue userSate)
-        {
-            return new MessageDTO()
-            {
-                Message = "Я не понял ваш ответ, пожалуйста дайте ответ снова",
-                KeyboardMarkup = GenerateKeyboardMarkup(userSate.stateQuestion.CurrentQuestion.Answers)
-            };
         }
 
         private async Task<StateValue> GetUserState(long userId)
@@ -353,42 +370,9 @@ namespace app.domain.Services
             return new MessageDTO()
             {
                 Message = "Чем тебе могу помочь?",
-                KeyboardMarkup = GenerateKeyboardMarkup("Факультеты", "Тест на проф. ориентацию")
+                KeyboardMarkup = GenerateKeyboardMarkup("Факультеты", "Тесты на проф. ориентацию")
             };
         }
 
-        public List<QuestionProf> InitQuestionsProf()
-        {
-            return new List<QuestionProf>(){
-                new QuestionProf() {Position = 1, Question = "Я предпочту заниматься финансовыми операциями, а не, например, музыкой.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 2, Question = "Работа, связанная с учетом и контролем, – это довольно скучно", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 3, Question = "Невозможно точно рассчитать, сколько времени уйдет на дорогу до работы, по крайней мере, мне.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 4, Question = "Я часто рискую.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 5, Question = "Меня раздражает беспорядок.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 6, Question = "Я охотно почитал(а) бы на досуге о последних достижениях в различных областях науки.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 7, Question = "Записи, которые я делаю, не очень хорошо структурированы и организованы.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 8, Question = "Я предпочитаю разумно распределять деньги, а не тратить все сразу.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 9, Question = "У меня наблюдается, скорее, рабочий беспорядок на столе, чем расположение вещей по аккуратным «стопочкам».", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 10, Question = "Меня привлекает работа, где необходимо действовать согласно инструкции или четко заданному алгоритму.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 11, Question = "Если бы я что-то собирал(а), я бы постарался(ась) привести в порядок коллекцию, все разложить по папочкам и полочкам.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 12, Question = "Терпеть не могу наводить порядок и систематизировать что бы то ни было.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 13, Question = "Мне нравится работать на компьютере – оформлять или просто набирать тексты, производить расчеты.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 14, Question = "Прежде чем действовать, надо продумать все детали.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 15, Question = "На мой взгляд, графики и таблицы – очень удобный и информативный способ предоставления информации.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 16, Question = "Мне нравятся игры, в которых я могу точно рассчитать шансы на успех и сделать осторожный, но точный ход.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 17, Question = "При изучении иностранного языка я предпочитаю начинать с грамматики, а не получать разговорный опыт без знания грамматических основ.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 18, Question = "Сталкиваясь с какой-либо проблемой, я пытаюсь всесторонне ее изучить (ознакомиться с соответствующей литературой, поискать нужную информацию в интернете, поговорить со специалистами).", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 19, Question = "Если я выражаю свои мысли на бумаге, мне важнее...", Answers = new string[] {"Логичность текста","Затрудняюсь ответить","Образность изложения"}},
-                new QuestionProf() {Position = 20, Question = "У меня есть ежедневник, в который я записываю важную информацию на несколько дней вперед.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 21, Question = "Я с удовольствием смотрю новости политики и экономики.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 22, Question = "Я бы хотел(а), чтобы моя будущая профессия.", Answers = new string[] {"Обеспечивала меня нужной порцией адреналина","Затрудняюсь ответить","Давала бы мне ощущение спокойствия и надежности"}},
-                new QuestionProf() {Position = 23, Question = "Я доделываю работу в последний момент.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 24, Question = "Взяв книгу, я всегда ставлю ее на место.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 25, Question = "Когда я ложусь спать, то уже наверняка знаю, что буду делать завтра.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 26, Question = "В своих словах и поступках я следую пословице «Семь раз отмерь, один – отрежь».", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 27, Question = "Перед ответственными делами я всегда составляю план их выполнения.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-                new QuestionProf() {Position = 28, Question = "После вечеринки мытье посуды я откладываю до утра.", Answers = new string[] {"Да", "Затрудняюсь ответить", "Нет"}},
-            };
-        }
     }
 }
