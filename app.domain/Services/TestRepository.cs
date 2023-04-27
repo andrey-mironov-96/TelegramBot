@@ -88,7 +88,7 @@ namespace app.domain.Services
 
         public async Task<List<TestDTO>> Get()
         {
-            List<Test> tests = await this.dbContext.Tests.AsNoTracking().ToListAsync();
+            List<Test> tests = await this.dbContext.Tests.AsNoTracking().Where(test => test.IsDeleted == false).ToListAsync();
             return ToDTO(tests);
         }
 

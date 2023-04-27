@@ -15,9 +15,9 @@ namespace app.web.view.Controllers
         }
 
         [HttpGet, Route("next-position")]
-        public IActionResult GetNextPosition()
+        public IActionResult GetNextPosition(long testId)
         {
-            short nextPosition = this.businessService.GetNextQuestionPosition();
+            int nextPosition = this.businessService.GetNextQuestionPosition(testId);
             return Ok(nextPosition);
         }
         

@@ -22,11 +22,13 @@ namespace BusinesDAL.Services
             this.stateService = stateService;
         }
 
-        public Task<bool> DeleteAsync(long id)
+        public async Task<bool> DeleteAsync(long id)
         {
             try
             {
-                return this.fRepository.DeleteAsync(id);
+                await this.fRepository.DeleteAsync(id);
+                await this.stateService.RemoveKey(this.stateService.facultyKey);
+                return true;
             }
             catch (Exception ex)
             {

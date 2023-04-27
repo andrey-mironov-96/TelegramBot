@@ -22,6 +22,7 @@ namespace app.domain.Services
             => Task.FromResult(ToDTO(_dbContext.Faculties
                     .AsNoTracking()
                     .Include(fac => fac.Specialities)
+                    .Where(fac => fac.IsDeleted == false)
                     .ToList()
                 ));
 

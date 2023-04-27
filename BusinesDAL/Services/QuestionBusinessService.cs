@@ -60,11 +60,11 @@ namespace BusinesDAL.Services
             }
         }
 
-        public short GetNextQuestionPosition()
+        public int GetNextQuestionPosition(long testId)
         {
             try
             {
-                return this.repository.GetNextQuestionPosition();
+                return this.repository.GetNextQuestionPosition(testId);
             }
             catch (Exception ex)
             {

@@ -76,11 +76,15 @@ namespace app.domain.Services
             return ToDTO(question);
         }
 
-        public short GetNextQuestionPosition()
+        public int GetNextQuestionPosition(long testId)
         {
-           short currentPosition = this.database.Questions.AsNoTracking().Where(q =>q.IsDeleted == false).OrderByDescending(q => q.Position).First().Position;
-           currentPosition++;
-           return currentPosition;
+            Question[] questions = this.database.Questions.AsNoTracking().Where(q => q.IsDeleted == false && q.TestId == testId).ToArray();
+            int currentPosition = questions.Count();
+            if (currentPosition == 0)
+            {
+                return 0;
+            }
+            return currentPosition++;
         }
 
         private QuestionDTO ToDTO(Question domain)
@@ -167,10 +171,10 @@ namespace app.domain.Services
 
         public IEnumerable<QuestionDTO> GetQuestionsOfTest(long testId)
         {
-           List<Question> questions = this.database.Questions
-           .Include(question => question.Answers.Where(a => !a.IsDeleted).OrderBy(a => a.Point))
-           .AsNoTracking().Where(question => question.IsDeleted == false && question.TestId == testId).ToList();
-           return ToDTO(questions);
+            List<Question> questions = this.database.Questions
+            .Include(question => question.Answers.Where(a => !a.IsDeleted).OrderBy(a => a.Point))
+            .AsNoTracking().Where(question => question.IsDeleted == false && question.TestId == testId).ToList();
+            return ToDTO(questions);
         }
 
         private IQueryable<Question> AddFilters(IQueryable<Question> query, Filter[] filters)
@@ -190,6 +194,6 @@ namespace app.domain.Services
             return query;
         }
 
-       
+
     }
 }
