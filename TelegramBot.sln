@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app.domain", "app.domain\ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app.common", "app.common\app.common.csproj", "{59686FE6-875A-4B39-AB59-35C725FFE405}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app.view", "app.view\app.view.csproj", "{C669CC81-B97E-4D83-8654-0735C5118EDA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app.domain.test", "app.domain.test\app.domain.test.csproj", "{51F83C23-B5B1-4999-B1A9-3F7A7B380F79}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app.test.core", "app.test.core\app.test.core.csproj", "{CF411422-439E-4672-B2DC-87CFD0B81509}"
@@ -54,10 +52,6 @@ Global
 		{59686FE6-875A-4B39-AB59-35C725FFE405}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59686FE6-875A-4B39-AB59-35C725FFE405}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59686FE6-875A-4B39-AB59-35C725FFE405}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C669CC81-B97E-4D83-8654-0735C5118EDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C669CC81-B97E-4D83-8654-0735C5118EDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C669CC81-B97E-4D83-8654-0735C5118EDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C669CC81-B97E-4D83-8654-0735C5118EDA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{51F83C23-B5B1-4999-B1A9-3F7A7B380F79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{51F83C23-B5B1-4999-B1A9-3F7A7B380F79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51F83C23-B5B1-4999-B1A9-3F7A7B380F79}.Release|Any CPU.ActiveCfg = Release|Any CPU
