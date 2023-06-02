@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebParse", "WebParse\WebParse.csproj", "{C970A67C-E724-470B-9AF8-99041807CCDD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinesDAL", "BusinesDAL\BusinesDAL.csproj", "{556E6355-0BFC-49AF-83E9-DE5213571358}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app.domain", "app.domain\app.domain.csproj", "{7ED62B51-9AA1-45F7-8137-15330FEF15AC}"
@@ -26,10 +24,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C970A67C-E724-470B-9AF8-99041807CCDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C970A67C-E724-470B-9AF8-99041807CCDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C970A67C-E724-470B-9AF8-99041807CCDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C970A67C-E724-470B-9AF8-99041807CCDD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A8ECD826-9ED9-4E4B-A47B-6F6CB370A9DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A8ECD826-9ED9-4E4B-A47B-6F6CB370A9DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8ECD826-9ED9-4E4B-A47B-6F6CB370A9DD}.Release|Any CPU.ActiveCfg = Release|Any CPU

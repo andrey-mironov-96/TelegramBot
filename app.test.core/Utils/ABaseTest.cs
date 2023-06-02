@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using app.domain.Abstract;
 using app.domain.Cache.Services;
 using app.domain.Data.Configuration;
@@ -11,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using StackExchange.Redis;
-using WebParse.Business;
-using WebParse.Services;
 
 namespace app.test.core.Utils
 {
@@ -54,13 +48,7 @@ namespace app.test.core.Utils
             );
         }
 
-        protected IWebParseService GetWebParseService()
-        {
-            return new WebParseService(
-                new NullLogger<WebParseService>(),
-                GetStackTraceService()
-            );
-        }
+       
 
         protected IStateService GetStateService()
         {
