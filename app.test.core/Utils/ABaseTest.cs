@@ -74,10 +74,26 @@ namespace app.test.core.Utils
         {
             return new BotService(
                 GetStateService(),
-                GetFacultyRepository()
+                GetFacultyRepository(),
+                GetTestRepository(),
+                GetQuestionRepository(),
+                GetTestScoreRepository()
             );
         }
-
+        public IQuestionRepository  GetQuestionRepository()
+        {
+            return new QuestionRepository(
+                new NullLogger<QuestionRepository>(),
+                GetAppDbContext()
+            );
+        }
+        public ITestScoreRepository  GetTestScoreRepository()
+        {
+            return new TestScoreRepository(
+                new NullLogger<TestScoreRepository>(),
+                GetAppDbContext()
+            );
+        }
         protected IBusinessBotService GetBusinessBotService()
         {
             return new BusinessBotService(

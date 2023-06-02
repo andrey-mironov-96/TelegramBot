@@ -2,13 +2,10 @@ using app.domain.Abstract;
 using app.domain.Cache.Configuration;
 using app.domain.Data.Utils.Configure;
 using app.domain.Services;
-using app.web.view.Configure;
 using app.web.view.Services;
 using BusinesDAL.Abstract;
 using BusinesDAL.Services;
 using Telegram.Bot;
-using WebParse.Business;
-using WebParse.Services;
 using static app.web.view.Configure.TelegramBotConfigure;
 
 internal class Program
@@ -48,8 +45,6 @@ internal class Program
             builder.Services.AddScoped<ITestScoreRepository, TestScoreRepository>();
             builder.Services.AddScoped<IQuestionBusinessService, QuestionBusinessService>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-        //TelegramBotConfigure.Configure(builder);
-        // DataLayerConfigure.Configure(builder.Services);
 
         CacheConfigure.Build(builder.Services);
         DatabaseConfigure.Build(builder.Services);
