@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\BusinesDAL\BusinesDAL.csproj" />
+        <ProjectReference Include="..\app.business\BusinesDAL.csproj" />
     <ProjectReference Include="..\app.common\app.common.csproj" />
     <ProjectReference Include="..\WebParse\WebParse.csproj" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-namespace BusinesDAL.Models.Utils
+namespace app.business.Models.Utils
 {
     public enum DefaultAnswerType
     {

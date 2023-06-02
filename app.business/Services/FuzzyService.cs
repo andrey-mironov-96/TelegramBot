@@ -1,8 +1,8 @@
 using app.common.Exctensions;
-using BusinesDAL.Abstract;
+using app.business.Abstract;
 using Microsoft.Extensions.Logging;
 
-namespace BusinesDAL.Services
+namespace app.business.Services
 {
     public class FuzzyService : IFuzzyService
     {

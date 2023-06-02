@@ -1,7 +1,7 @@
 
 using app.common.DTO;
 
-namespace BusinesDAL.Services
+namespace app.business.Services
 {
     public interface IAdmissionPlanService
     {

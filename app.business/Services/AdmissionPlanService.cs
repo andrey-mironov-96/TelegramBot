@@ -1,12 +1,12 @@
 // using app.common.DTO;
 // using app.common.Utils.Enums;
 // using app.domain.Abstract;
-// using BusinesDAL.Abstract;
-// using BusinesDAL.Models;
+// using app.business.Abstract;
+// using app.business.Models;
 // using Microsoft.Extensions.Logging;
 // using Telegram.Bot.Types.ReplyMarkups;
 
-// namespace BusinesDAL.Services
+// namespace app.business.Services
 // {
 //     public class AdmissionPlanService //: IAdmissionPlanService
 //     {

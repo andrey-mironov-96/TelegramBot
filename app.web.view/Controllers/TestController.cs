@@ -1,6 +1,6 @@
 ﻿using app.common.DTO;
 using app.common.Utils;
-using BusinesDAL.Abstract;
+using app.business.Abstract;
 using Microsoft.AspNetCore.Mvc;
 
 namespace app.web.view.Controllers

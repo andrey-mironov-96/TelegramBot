@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using app.domain.Abstract;
 using app.domain.Services;
-using BusinesDAL.Abstract;
-using BusinesDAL.Services;
+using app.business.Abstract;
+using app.business.Services;
 
 namespace app.web.view.Configure
 {

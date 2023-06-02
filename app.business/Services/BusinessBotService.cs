@@ -2,7 +2,7 @@ using app.common.DTO;
 using app.common.Utils.CustomException;
 using app.domain.Abstract;
 
-namespace BusinesDAL.Services
+namespace app.business.Services
 {
     public class BusinessBotService : IBusinessBotService
     {

@@ -1,4 +1,4 @@
-namespace BusinesDAL.Abstract
+namespace app.business.Abstract
 {
     public interface IFuzzyService
     {

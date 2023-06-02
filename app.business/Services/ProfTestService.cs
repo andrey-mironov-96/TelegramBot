@@ -3,7 +3,7 @@ using app.domain.Abstract;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace BusinesDAL.Services
+namespace app.business.Services
 {
     public class ProfTestService : IProfTestService
     {

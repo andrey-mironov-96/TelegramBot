@@ -1,6 +1,6 @@
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace BusinesDAL
+namespace app.business
 {
     public class ExecuteResult
     {

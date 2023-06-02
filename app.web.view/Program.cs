@@ -3,8 +3,8 @@ using app.domain.Cache.Configuration;
 using app.domain.Data.Utils.Configure;
 using app.domain.Services;
 using app.web.view.Services;
-using BusinesDAL.Abstract;
-using BusinesDAL.Services;
+using app.business.Abstract;
+using app.business.Services;
 using Telegram.Bot;
 using static app.web.view.Configure.TelegramBotConfigure;
 

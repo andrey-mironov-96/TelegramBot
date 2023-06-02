@@ -1,4 +1,4 @@
-namespace BusinesDAL.Extensions
+namespace app.business.Extensions
 {
     public static class DictionaryExtensions
     {

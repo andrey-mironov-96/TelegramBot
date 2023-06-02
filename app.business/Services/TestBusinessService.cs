@@ -1,10 +1,10 @@
 ﻿using app.common.DTO;
 using app.common.Utils;
 using app.domain.Abstract;
-using BusinesDAL.Abstract;
+using app.business.Abstract;
 using Microsoft.Extensions.Logging;
 
-namespace BusinesDAL.Services
+namespace app.business.Services
 {
     public class TestBusinessService : ITestBusinessService
     {

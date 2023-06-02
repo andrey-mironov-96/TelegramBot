@@ -1,8 +1,8 @@
 using app.domain.Abstract;
 using app.domain.Services;
 using app.web.view.Services;
-using BusinesDAL.Abstract;
-using BusinesDAL.Services;
+using app.business.Abstract;
+using app.business.Services;
 using Telegram.Bot;
 
 namespace app.web.view.Configure
