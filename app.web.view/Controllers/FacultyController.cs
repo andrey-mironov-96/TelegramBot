@@ -14,6 +14,7 @@ namespace app.web.view.Controllers
         {
 
         }
+        
         [HttpGet, Route("get-all")]
         public async Task<ActionResult<IEnumerable<FacultyDTO>>> GetAllAsync()
         {
